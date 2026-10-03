@@ -7,7 +7,8 @@
 
 export type PanelType =
   | 'OVR' | 'PLS' | 'IDX' | 'CHT' | 'WL' | 'NWS' | 'FX' | 'YC' | 'MAC'
-  | 'CRY' | 'BOOK' | 'CAL' | 'CLK' | 'COR' | 'SEA' | 'ASK' | 'HELP';
+  | 'CRY' | 'BOOK' | 'CAL' | 'CLK' | 'COR' | 'SEA' | 'ASK' | 'HELP'
+  | 'USA' | 'BND' | 'SBN' | 'FND' | 'SCR' | 'HUB';
 
 export type Category = 'Markets' | 'Indonesia' | 'Macro' | 'Crypto' | 'Analytics' | 'Tools';
 
@@ -47,6 +48,6 @@ export const PANELS: Record<PanelType, PanelMeta> = {
   HELP: { type: 'HELP', title: 'Terminal Guide', description: 'Commands, shortcuts and data sources', category: 'Tools', w: 5, h: 13, minW: 3, minH: 6, keywords: ['help', 'guide', 'commands', 'how', 'shortcuts', 'sources'] },
 };
 
-export const PANEL_ORDER: PanelType[] = ['PLS', 'OVR', 'CHT', 'WL', 'NWS', 'IDX', 'FX', 'CLK', 'YC', 'MAC', 'CRY', 'BOOK', 'COR', 'SEA', 'ASK', 'CAL', 'HELP'];
+export const PANEL_ORDER: PanelType[] = ['PLS', 'OVR', 'CHT', 'WL', 'NWS', 'USA', 'IDX', 'FX', 'SBN', 'FND', 'YC', 'BND', 'MAC', 'CRY', 'BOOK', 'COR', 'SEA', 'SCR', 'HUB', 'ASK', 'CAL', 'CLK', 'HELP'];
 
 export const CATEGORIES: Category[] = ['Markets', 'Indonesia', 'Macro', 'Crypto', 'Analytics', 'Tools'];

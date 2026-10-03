@@ -7,7 +7,8 @@
 
 export type PanelType =
   | 'OVR' | 'PLS' | 'IDX' | 'CHT' | 'WL' | 'NWS' | 'FX' | 'YC' | 'MAC'
-  | 'CRY' | 'BOOK' | 'CAL' | 'CLK' | 'COR' | 'SEA' | 'ASK' | 'HELP';
+  | 'CRY' | 'BOOK' | 'CAL' | 'CLK' | 'COR' | 'SEA' | 'ASK' | 'HELP'
+  | 'USA' | 'BND' | 'SBN' | 'FND' | 'SCR' | 'HUB';
 
 export type Category = 'Markets' | 'Indonesia' | 'Macro' | 'Crypto' | 'Analytics' | 'Tools';
 
@@ -45,8 +46,14 @@ export const PANELS: Record<PanelType, PanelMeta> = {
   ASK: { type: 'ASK', title: 'Ask Kuartal', description: 'Assistant that drives the terminal for you', category: 'Tools', w: 4, h: 12, minW: 3, minH: 7, keywords: ['ask', 'ai', 'assistant', 'help me', 'kuartal ai'] },
   CAL: { type: 'CAL', title: 'Calculators', description: 'IDX lots & fees, position sizing, compounding', category: 'Tools', w: 6, h: 12, minW: 4, minH: 8, keywords: ['calculator', 'kalkulator', 'fees', 'lot', 'position size', 'compound', 'dca'] },
   HELP: { type: 'HELP', title: 'Terminal Guide', description: 'Commands, shortcuts and data sources', category: 'Tools', w: 5, h: 13, minW: 3, minH: 6, keywords: ['help', 'guide', 'commands', 'how', 'shortcuts', 'sources'] },
+  USA: { type: 'USA', title: 'US Markets', description: 'US indices, equities and ETFs', category: 'Markets', w: 7, h: 14, minW: 4, minH: 8, keywords: ['usa', 'us', 'america', 'american', 'nasdaq', 's&p', 'dow', 'stocks', 'equities'] },
+  BND: { type: 'BND', title: 'Bonds & Rates', description: 'Treasuries, bond ETFs and rates', category: 'Macro', w: 6, h: 14, minW: 4, minH: 8, keywords: ['bond', 'bonds', 'treasury', 'rates', 'fixed income', 'yield'] },
+  SBN: { type: 'SBN', title: 'Indonesia SBN', description: 'SUN, SBSN, SBN Ritel and government bond research', category: 'Indonesia', w: 6, h: 12, minW: 4, minH: 7, keywords: ['sbn', 'sun', 'sbsn', 'ori', 'sbr', 'sr', 'st', 'government bonds', 'obligasi negara'] },
+  FND: { type: 'FND', title: 'Funds & Fixed Income', description: 'Reksa dana and fixed-income research hub', category: 'Indonesia', w: 6, h: 14, minW: 4, minH: 8, keywords: ['reksadana', 'reksa dana', 'money market', 'pasar uang', 'obligasi', 'fixed income', 'fund'] },
+  SCR: { type: 'SCR', title: 'Market Screener', description: 'Free-feed quote and momentum scanner for IDX and USA', category: 'Analytics', pro: true, w: 7, h: 14, minW: 4, minH: 8, keywords: ['screener', 'scanner', 'screen', 'momentum', 'rank', 'filter'] },
+  HUB: { type: 'HUB', title: 'Asset Class Hub', description: 'Navigate equities, rates, funds and cross-asset research', category: 'Markets', w: 6, h: 12, minW: 4, minH: 7, keywords: ['asset classes', 'assets', 'research', 'hub', 'terminal'] },
 };
 
-export const PANEL_ORDER: PanelType[] = ['PLS', 'OVR', 'CHT', 'WL', 'NWS', 'IDX', 'FX', 'CLK', 'YC', 'MAC', 'CRY', 'BOOK', 'COR', 'SEA', 'ASK', 'CAL', 'HELP'];
+export const PANEL_ORDER: PanelType[] = ['PLS', 'OVR', 'CHT', 'WL', 'NWS', 'USA', 'IDX', 'FX', 'SBN', 'FND', 'YC', 'BND', 'MAC', 'CRY', 'BOOK', 'COR', 'SEA', 'SCR', 'HUB', 'ASK', 'CAL', 'CLK', 'HELP'];
 
 export const CATEGORIES: Category[] = ['Markets', 'Indonesia', 'Macro', 'Crypto', 'Analytics', 'Tools'];

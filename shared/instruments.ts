@@ -124,7 +124,21 @@ export const MARKETS: Instrument[] = [
   { symbol: 'PAXGUSDT', label: 'PAXG', name: 'PAX Gold (tokenised gold)', assetClass: 'crypto', group: 'Crypto', currency: 'USDT' },
 ];
 
-export const ALL_INSTRUMENTS: Instrument[] = [...MARKETS, ...LQ45];
+const US_EQUITIES: Instrument[] = [
+  ['AAPL','Apple'],['MSFT','Microsoft'],['NVDA','NVIDIA'],['AMZN','Amazon'],['META','Meta Platforms'],['GOOGL','Alphabet'],['TSLA','Tesla'],
+  ['AVGO','Broadcom'],['JPM','JPMorgan Chase'],['BRK-B','Berkshire Hathaway'],['XOM','Exxon Mobil'],['UNH','UnitedHealth'],['V','Visa'],['MA','Mastercard'],
+  ['LLY','Eli Lilly'],['COST','Costco'],['WMT','Walmart'],['JNJ','Johnson & Johnson'],['PG','Procter & Gamble'],['HD','Home Depot'],
+  ['NFLX','Netflix'],['ORCL','Oracle'],['CRM','Salesforce'],['AMD','AMD'],['QCOM','Qualcomm'],['BAC','Bank of America'],['GS','Goldman Sachs'],
+  ['CAT','Caterpillar'],['GE','GE Aerospace'],['KO','Coca-Cola'],
+].map(([symbol, name]) => ({ symbol, label: symbol, name, assetClass: 'equity' as const, group: 'US Equities', currency: 'USD' }));
+
+const US_ETFS: Instrument[] = [
+  ['SPY','SPDR S&P 500 ETF'],['QQQ','Invesco QQQ'],['IWM','iShares Russell 2000'],['DIA','SPDR Dow Jones Industrial Average ETF'],
+  ['TLT','iShares 20+ Year Treasury Bond ETF'],['IEF','iShares 7-10 Year Treasury Bond ETF'],['SHY','iShares 1-3 Year Treasury Bond ETF'],
+  ['LQD','iShares Investment Grade Corporate Bond ETF'],['HYG','iShares High Yield Corporate Bond ETF'],['TIP','iShares TIPS Bond ETF'],['AGG','iShares Core U.S. Aggregate Bond ETF'],
+].map(([symbol, name]) => ({ symbol, label: symbol, name, assetClass: 'etf' as const, group: 'US ETFs & Bonds', currency: 'USD' }));
+
+export const ALL_INSTRUMENTS: Instrument[] = [...MARKETS, ...LQ45, ...US_EQUITIES, ...US_ETFS];
 
 const byKey = new Map<string, Instrument>();
 for (const i of ALL_INSTRUMENTS) {

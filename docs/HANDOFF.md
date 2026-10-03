@@ -1,3 +1,11 @@
+## 2026-10-04 — Codex — Terminal expansion and multi-page UI
+Branch/PR: ai/codex/terminal-expansion
+Changed: Added multi-page navigation (Dashboard, Markets, Indonesia, Bonds & Rates, Macro, Digital Assets, Research, Tools) while retaining the existing customizable dashboard/workspace system. Added US Markets, Bonds & Rates, Indonesia SBN, Funds & Fixed Income, Market Screener and Asset Class Hub panels. Added explicit Ask Kuartal "Coming soon" messaging. Reworked sidebar category flyouts to use contained menus and made empty workspaces recoverable instead of appearing blank. Added commands for the new sections and registered the new panel codes in the stable contract.
+Why: Owner requested a larger Koyfin/Kuantara-style terminal with multiple research pages, a customizable main dashboard, broader US/fixed-income/Indonesian investment coverage, clearer Ask Kuartal status, and fixes to broken sidebar menus/blank states.
+Verified: Repository-level inspection completed. Full `npm run check` has not yet been run in this environment because the GitHub-connected editing environment does not provide the repo's Node dependency installation/runtime.
+Not done / known issues: Kuartal ID SSO is intentionally not activated in this feature pass. Fund-level NAV/AUM/flow data and Indonesia SBN benchmark/auction feeds are not fabricated; the new panels currently provide validated classifications/research entry points until dedicated free public adapters are implemented. New screener uses quote/momentum data only.
+Next agent should: Run `npm install && npm run check`; fix any TypeScript/test issues; visually review desktop and ~390px mobile layouts; then continue expanding the data adapters and connect Kuartal ID after feature coverage is stable.
+
 # Handoff log
 
 Every agent (and human) appends an entry here **at the end of each work session**,

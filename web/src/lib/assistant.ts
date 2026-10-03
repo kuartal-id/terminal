@@ -47,6 +47,9 @@ const PANEL_ALIASES: Record<string, PanelType> = {
   MACRO: 'MAC', MAKRO: 'MAC', YIELD: 'YC', YIELDS: 'YC', CALC: 'CAL', CALCULATOR: 'CAL', CLOCK: 'CLK', HOURS: 'CLK',
   OVERVIEW: 'OVR', MARKETS: 'OVR', FOREX: 'FX', KURS: 'FX', LQ45: 'IDX', SAHAM: 'IDX', GUIDE: 'HELP', AI: 'ASK',
   CORRELATION: 'COR', SEASONALITY: 'SEA', BOOK: 'BOOK', DEPTH: 'BOOK',
+  USA: 'USA', US: 'USA', AMERICA: 'USA', BONDS: 'BND', BOND: 'BND', TREASURIES: 'BND', RATES: 'BND',
+  SBN: 'SBN', SUN: 'SBN', SBSN: 'SBN', REKSADANA: 'FND', 'REKSA DANA': 'FND', FUNDS: 'FND', 'FIXED INCOME': 'FND',
+  SCREENER: 'SCR', SCAN: 'SCR', SCANNER: 'SCR', ASSETS: 'HUB', 'ASSET CLASSES': 'HUB', HUB: 'HUB',
 };
 
 const KNOWN = new Set(ALL_INSTRUMENTS.flatMap((i) => [i.label.toUpperCase(), i.symbol.toUpperCase()]));

@@ -8,6 +8,7 @@ import { useQuoteMap } from '../panels/markets';
 import { CommandBar } from './CommandBar';
 import { I } from './Icons';
 import { Workspace } from './Workspace';
+import { ResearchPage, type PageKey } from './ResearchPage';
 
 function Clock() {
   const [now, setNow] = useState(() => new Date());
@@ -80,38 +81,24 @@ function Rail() {
   const [openCat, setOpenCat] = useState<Category | null>(null);
   return (
     <nav className="rail" aria-label="Panels">
-      <button onClick={() => openPanel('PLS', {}, { reuse: true })} title="Kuartal Pulse">
-        <I.pulse />
-        PULSE
-      </button>
-      <button onClick={() => openPanel('ASK', {}, { reuse: true })} title="Ask Kuartal">
-        <I.spark />
-        ASK
-      </button>
+      <button onClick={() => openPanel('PLS', {}, { reuse: true })} title="Kuartal Pulse"><I.pulse />PULSE</button>
+      <button onClick={() => openPanel('ASK', {}, { reuse: true })} title="Ask Kuartal — coming soon"><I.spark />ASK</button>
       <hr />
       {CATEGORIES.map((c) => {
         const Icon = CAT_ICON[c];
         return (
-          <div key={c} style={{ position: 'relative' }}>
+          <div key={c} className="rail-group">
             <button className={openCat === c ? 'on' : ''} onClick={() => setOpenCat(openCat === c ? null : c)} title={c} aria-expanded={openCat === c}>
-              <Icon />
-              {CAT_SHORT[c]}
+              <Icon />{CAT_SHORT[c]}
             </button>
             {openCat === c && (
-              <div className="cmd-menu" style={{ position: 'fixed', left: 'calc(var(--rail-w) + 6px)', top: 'auto', width: 300, marginTop: -44, zIndex: 60 }} onMouseLeave={() => setOpenCat(null)}>
+              <div className="rail-flyout" role="menu" aria-label={c}>
                 <div className="cmd-section">{c}</div>
                 {PANEL_ORDER.filter((t) => PANELS[t].category === c).map((t) => (
-                  <button
-                    key={t}
-                    className="cmd-item"
-                    onClick={() => {
-                      openPanel(t);
-                      setOpenCat(null);
-                    }}
-                  >
+                  <button key={t} className="cmd-item" onClick={() => { openPanel(t); setOpenCat(null); }}>
                     <span className="code">{t}</span>
                     <span className="label">{PANELS[t].title}</span>
-                    <span className="hint">{PANELS[t].pro ? 'PRO' : '+'}</span>
+                    <span className="hint">{PANELS[t].pro ? 'PRO' : 'OPEN'}</span>
                   </button>
                 ))}
               </div>
@@ -120,10 +107,8 @@ function Rail() {
         );
       })}
       <hr />
-      <button onClick={() => openPanel('HELP', {}, { reuse: true })} title="Terminal guide">
-        <I.help />
-        GUIDE
-      </button>
+      <button onClick={() => openPanel('HUB', {}, { reuse: true })} title="Asset classes"><I.grid />ASSET</button>
+      <button onClick={() => openPanel('HELP', {}, { reuse: true })} title="Terminal guide"><I.help />GUIDE</button>
     </nav>
   );
 }
@@ -136,6 +121,7 @@ function Tabs() {
   const removeWorkspace = useStore((s) => s.removeWorkspace);
   const renameWorkspace = useStore((s) => s.renameWorkspace);
   const resetActive = useStore((s) => s.resetActive);
+  const openPanel = useStore((s) => s.openPanel);
   return (
     <div className="tabs" role="tablist">
       {workspaces.map((w) => (
@@ -172,11 +158,27 @@ function Tabs() {
       </button>
       <div className="tab-tools">
         <button className="btn small" onClick={() => resetActive()} title="Restore this workspace's default panels">
-          <I.reset width={12} height={12} /> Reset layout
-        </button>
+  <I.reset width={12} height={12} /> Reset
+</button>
+<button className="btn small" onClick={() => openPanel('HUB', {}, { reuse: true })} title="Browse all asset classes">
+  <I.grid width={12} height={12} /> Asset classes
+</button>
       </div>
     </div>
   );
+}
+
+function PageNav({ page, setPage }: { page: PageKey | 'dashboard'; setPage: (p: PageKey | 'dashboard') => void }) {
+  const items: Array<[PageKey | 'dashboard', string]> = [
+    ['dashboard', 'Dashboard'], ['markets', 'Markets'], ['indonesia', 'Indonesia'], ['fixed-income', 'Bonds & Rates'],
+    ['macro', 'Macro'], ['crypto', 'Digital Assets'], ['research', 'Research'], ['tools', 'Tools'],
+  ];
+  return <nav className="page-nav" aria-label="Terminal pages">
+    {items.map(([key, label]) => <button key={key} className={page === key ? 'on' : ''} onClick={() => {
+      setPage(key);
+      history.replaceState(null, '', key === 'dashboard' ? location.pathname : `#${key}`);
+    }}>{label}</button>)}
+  </nav>;
 }
 
 const TAPE = ['^JKSE', 'IDR=X', 'GC=F', 'BZ=F', 'MTF=F', '^GSPC', '^IXIC', '^N225', '^HSI', 'DX-Y.NYB', '^TNX', 'BTCUSDT', 'ETHUSDT', 'BBCA.JK', 'BBRI.JK', 'TLKM.JK'];
@@ -220,6 +222,10 @@ function Toast() {
 }
 
 export function DesktopShell() {
+  const [page, setPage] = useState<PageKey | 'dashboard'>(() => {
+    const key = location.hash.replace('#', '') as PageKey;
+    return key && ['markets','indonesia','fixed-income','macro','crypto','research','tools'].includes(key) ? key : 'dashboard';
+  });
   return (
     <div className="app">
       <header className="topbar">
@@ -236,8 +242,9 @@ export function DesktopShell() {
       </header>
       <Rail />
       <main className="main">
-        <Tabs />
-        <Workspace />
+        <PageNav page={page} setPage={setPage} />
+        {page === 'dashboard' ? <Tabs /> : <div className="page-spacer" />}
+        {page === 'dashboard' ? <Workspace /> : <ResearchPage page={page} />}
       </main>
       <TickerTape />
       <Toast />

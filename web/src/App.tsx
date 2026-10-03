@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { loadMe } from './lib/me';
+import { loadMe, useMe, useMeLoaded } from './lib/me';
+import { AccessGate } from './components/AccessGate';
+import { loginErrorMessage } from './lib/loginErrors';
 import { useStore } from './lib/store';
 import { DesktopShell } from './components/Shell';
 import { MobileShell } from './components/MobileShell';
@@ -33,11 +35,15 @@ export function App() {
     const p = new URLSearchParams(location.search);
     const auth = p.get('auth');
     if (auth) {
-      if (auth === 'error') notify(`Kuartal ID login didn't complete (${p.get('reason') ?? 'unknown'}). Please try again.`);
+      if (auth === 'error') notify(loginErrorMessage(p.get('reason')));
       if (auth === 'not-configured') notify('Kuartal ID login is not configured on this server yet.');
       history.replaceState(null, '', location.pathname);
     }
   }, [notify]);
 
+  const me = useMe();
+  const loaded = useMeLoaded();
+  // Nothing (and no data requests) until we know the visitor may use the terminal.
+  if (!loaded || !me || (me.loginRequired && !me.access)) return <AccessGate me={loaded ? me : undefined} />;
   return mobile ? <MobileShell /> : <DesktopShell />;
 }

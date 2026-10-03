@@ -1,6 +1,6 @@
 import type { Context } from 'hono';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
-import { createRemoteJWKSet, jwtVerify, SignJWT } from 'jose';
+import { createRemoteJWKSet, EncryptJWT, jwtDecrypt, jwtVerify, SignJWT } from 'jose';
 import type { Me, Tier } from '../../shared/types';
 import { authConfigured, config } from './config';
 
@@ -10,13 +10,17 @@ import { authConfigured, config } from './config';
  *
  * The terminal is a confidential client: the code exchange happens here on
  * the server, so the client secret and access token never reach the browser.
- * After login we keep only a signed session cookie with the user's sub, name,
- * email and entitlement keys (no tokens are stored).
+ * After login we keep an ENCRYPTED session cookie (A256GCM) with the user's sub,
+ * name, email, entitlement keys and Kuartal ID refresh token. Every
+ * RECHECK_MS the server silently refreshes and re-reads entitlements, so when
+ * an admin revokes terminal.access (or a paid membership expires) the user
+ * loses access within ~15 minutes, without having to log in again.
  */
 
 const SESSION_COOKIE = 'kt_session';
 const FLOW_COOKIE = 'kt_oidc';
-const SESSION_DAYS = 7;
+const SESSION_DAYS = 30; // matches Kuartal ID refresh-token lifetime
+const RECHECK_MS = 15 * 60_000;
 
 interface Discovery {
   authorization_endpoint: string;
@@ -53,6 +57,11 @@ async function getDiscovery(): Promise<Discovery> {
 }
 
 const secretKey = () => new TextEncoder().encode(config.sessionSecret);
+let encKey: Uint8Array | undefined;
+async function encryptionKey(): Promise<Uint8Array> {
+  encKey ??= new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`kt-session:${config.sessionSecret}`)));
+  return encKey;
+}
 
 function b64url(buf: ArrayBuffer | Uint8Array): string {
   return Buffer.from(buf instanceof Uint8Array ? buf : new Uint8Array(buf)).toString('base64url');
@@ -74,17 +83,106 @@ export interface SessionClaims {
   name?: string;
   email?: string;
   ent: string[];
+  /** Kuartal ID refresh token (never sent to the browser in readable form). */
+  rt?: string;
+  /** Unix ms when entitlements were last confirmed with Kuartal ID. */
+  chk: number;
 }
 
-export async function readSession(c: Context): Promise<SessionClaims | null> {
-  const raw = getCookie(c, SESSION_COOKIE);
-  if (!raw || !authConfigured()) return null;
+/** Encrypt session claims into the cookie value. Exported for tests. */
+export async function sealSession(s: SessionClaims): Promise<string> {
+  return new EncryptJWT({ name: s.name, email: s.email, ent: s.ent, rt: s.rt, chk: s.chk })
+    .setProtectedHeader({ alg: 'dir', enc: 'A256GCM' })
+    .setSubject(s.sub)
+    .setIssuer('kuartal-terminal')
+    .setIssuedAt()
+    .setExpirationTime(`${SESSION_DAYS}d`)
+    .encrypt(await encryptionKey());
+}
+
+async function writeSession(c: Context, s: SessionClaims) {
+  const jwt = await sealSession(s);
+  setCookie(c, SESSION_COOKIE, jwt, { httpOnly: true, secure: secure(), sameSite: 'Lax', path: '/', maxAge: SESSION_DAYS * 86400 });
+}
+
+async function decodeSession(raw: string): Promise<SessionClaims | null> {
   try {
-    const { payload } = await jwtVerify(raw, secretKey(), { issuer: 'kuartal-terminal' });
-    return { sub: String(payload.sub), name: payload.name as string | undefined, email: payload.email as string | undefined, ent: (payload.ent as string[]) ?? [] };
+    const { payload } = await jwtDecrypt(raw, await encryptionKey(), { issuer: 'kuartal-terminal' });
+    return {
+      sub: String(payload.sub),
+      name: payload.name as string | undefined,
+      email: payload.email as string | undefined,
+      ent: (payload.ent as string[]) ?? [],
+      rt: payload.rt as string | undefined,
+      chk: Number(payload.chk ?? 0),
+    };
   } catch {
     return null;
   }
+}
+
+/** Refresh in flight per refresh token, so parallel requests share one rotation (Kuartal ID detects token reuse). */
+const refreshing = new Map<string, Promise<SessionClaims | null>>();
+
+async function recheck(s: SessionClaims): Promise<SessionClaims | null> {
+  if (!s.rt) return null;
+  const d = await getDiscovery();
+  const res = await fetch(d.token_endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
+    body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: s.rt, client_id: config.kuartalId.clientId, client_secret: config.kuartalId.clientSecret, scope: 'openid profile email entitlements' }),
+  });
+  if (res.status === 400 || res.status === 401) return null; // revoked / expired → signed out
+  if (!res.ok) throw new Error(`token ${res.status}`); // Kuartal ID hiccup → keep old session for now
+  const tokens = (await res.json()) as { access_token: string; refresh_token?: string };
+  const info = await fetchUserinfo(d.userinfo_endpoint, tokens.access_token);
+  if (!info) throw new Error('userinfo failed');
+  if (info.sub && info.sub !== s.sub) return null; // different account behind this token → sign out
+  return { ...s, name: info.name ?? s.name, email: info.email ?? s.email, ent: info.ent, rt: tokens.refresh_token ?? s.rt, chk: Date.now() };
+}
+
+/** Current session, silently re-checked with Kuartal ID every RECHECK_MS. Updates/clears the cookie as needed. */
+export async function readSession(c: Context): Promise<SessionClaims | null> {
+  const raw = getCookie(c, SESSION_COOKIE);
+  if (!raw || !authConfigured()) return null;
+  const s = await decodeSession(raw);
+  if (!s) {
+    deleteCookie(c, SESSION_COOKIE, { path: '/' });
+    return null;
+  }
+  if (Date.now() - s.chk < RECHECK_MS || !s.rt) return s;
+  let p = refreshing.get(s.rt);
+  if (!p) {
+    p = recheck(s);
+    refreshing.set(s.rt, p);
+    const key = s.rt;
+    p.finally(() => setTimeout(() => refreshing.delete(key), 60_000)).catch(() => {});
+  }
+  try {
+    const fresh = await p;
+    if (!fresh) {
+      deleteCookie(c, SESSION_COOKIE, { path: '/' });
+      return null;
+    }
+    await writeSession(c, fresh);
+    return fresh;
+  } catch {
+    return s; // Kuartal ID temporarily unreachable: keep the last known entitlements
+  }
+}
+
+async function fetchUserinfo(url: string, accessToken: string): Promise<{ sub?: string; name?: string; email?: string; ent: string[] } | null> {
+  const ui = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}`, Accept: 'application/json' } });
+  if (!ui.ok) return null;
+  const info = (await ui.json()) as { sub?: string; name?: string; email?: string; entitlements?: unknown[] };
+  const ent = (info.entitlements ?? []).map((e) => (typeof e === 'string' ? e : String((e as { key?: string }).key ?? ''))).filter(Boolean);
+  return { sub: info.sub ? String(info.sub) : undefined, name: info.name, email: info.email, ent };
+}
+
+/** May this visitor use the terminal at all? */
+export function hasAccess(session: SessionClaims | null): boolean {
+  if (config.devGrantPro || !config.requireLogin) return true;
+  return Boolean(session?.ent.includes(config.kuartalId.accessEntitlement));
 }
 
 export function tierFor(session: SessionClaims | null): Tier {
@@ -103,6 +201,8 @@ export async function me(c: Context): Promise<Me> {
     name: s?.name,
     email: s?.email,
     entitlements: s?.ent ?? [],
+    access: hasAccess(s),
+    loginRequired: config.requireLogin && !config.devGrantPro,
     loginUrl: '/auth/login',
     logoutUrl: '/auth/logout',
     upgradeUrl: config.kuartalId.upgradeUrl,
@@ -164,13 +264,13 @@ export async function callback(c: Context) {
       client_id: config.kuartalId.clientId,
       client_secret: config.kuartalId.clientSecret,
       code_verifier: flow.verifier,
-      // kuartal-login currently reads the nonce from the token request
-      // (TokenController) rather than binding it at /oauth/authorize.
+      // Kuartal ID binds the nonce at /oauth/authorize (since 2026-10-06);
+      // also sending it here keeps older Kuartal ID builds working.
       nonce: flow.nonce,
     }),
   });
   if (!tokenRes.ok) return fail('token');
-  const tokens = (await tokenRes.json()) as { access_token: string; id_token?: string };
+  const tokens = (await tokenRes.json()) as { access_token: string; id_token?: string; refresh_token?: string };
 
   let sub = '';
   let name: string | undefined;
@@ -194,25 +294,15 @@ export async function callback(c: Context) {
     return fail('id_token');
   }
   // Entitlements are not in the ID token; Kuartal ID returns them from /oauth/userinfo.
-  let ent: string[] = [];
-  const ui = await fetch(d.userinfo_endpoint, { headers: { Authorization: `Bearer ${tokens.access_token}`, Accept: 'application/json' } });
-  if (ui.ok) {
-    const info = (await ui.json()) as { sub?: string; name?: string; email?: string; entitlements?: unknown[] };
-    sub ||= String(info.sub ?? '');
-    name ??= info.name;
-    email ??= info.email;
-    ent = (info.entitlements ?? []).map((e) => (typeof e === 'string' ? e : String((e as { key?: string }).key ?? ''))).filter(Boolean);
-  }
+  const info = await fetchUserinfo(d.userinfo_endpoint, tokens.access_token);
+  if (!info) return fail('userinfo');
+  // The profile must belong to the same person the signed id_token names.
+  if (info.sub && info.sub !== sub) return fail('profile');
+  name ??= info.name;
+  email ??= info.email;
   if (!sub) return fail('profile');
 
-  const session = await new SignJWT({ name, email, ent })
-    .setProtectedHeader({ alg: 'HS256' })
-    .setSubject(sub)
-    .setIssuer('kuartal-terminal')
-    .setIssuedAt()
-    .setExpirationTime(`${SESSION_DAYS}d`)
-    .sign(secretKey());
-  setCookie(c, SESSION_COOKIE, session, { httpOnly: true, secure: secure(), sameSite: 'Lax', path: '/', maxAge: SESSION_DAYS * 86400 });
+  await writeSession(c, { sub, name, email, ent: info.ent, rt: tokens.refresh_token, chk: Date.now() });
   return c.redirect(flow.returnTo || '/');
 }
 

@@ -126,3 +126,12 @@ describe('panel catalogue', () => {
     expect(Object.keys(PANELS).sort()).toEqual([...PANEL_ORDER].sort());
   });
 });
+
+import { loginErrorMessage } from './loginErrors';
+describe('loginErrorMessage', () => {
+  it('explains a cancelled consent in plain words', () => {
+    expect(loginErrorMessage('access_denied')).toMatch(/cancelled/);
+    expect(loginErrorMessage('nonce')).toMatch(/confirm your identity/);
+    expect(loginErrorMessage(null)).toMatch(/didn't complete/);
+  });
+});

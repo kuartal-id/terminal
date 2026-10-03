@@ -5,7 +5,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import type { ApiError } from '../../shared/types';
 import { ALL_INSTRUMENTS, LQ45, MARKETS } from '../../shared/instruments';
-import { callback, login, logout, me, readSession, tierFor } from './auth';
+import { callback, hasAccess, login, logout, me, readSession, tierFor } from './auth';
 import { cache } from './cache';
 import { authConfigured, config } from './config';
 import { demoCurve, demoFx, demoMacro } from './providers/demo';
@@ -21,7 +21,7 @@ const started = Date.now();
 
 export const app = new Hono();
 
-const err = (c: Context, status: 400 | 401 | 402 | 404 | 429 | 502, code: ApiError['code'], error: string) => c.json<ApiError>({ error, code }, status);
+const err = (c: Context, status: 400 | 401 | 402 | 403 | 404 | 429 | 502, code: ApiError['code'], error: string) => c.json<ApiError>({ error, code }, status);
 
 // ── Security headers ─────────────────────────────────────────────
 app.use('*', async (c, next) => {
@@ -45,6 +45,19 @@ app.use('/api/*', async (c, next) => {
   buckets.set(ip, b);
   if (buckets.size > 20000) buckets.clear();
   await next();
+});
+
+// ── Access gate: Kuartal ID login + terminal.access ──────────────
+// Everything under /api except health and /api/me needs a signed-in Kuartal ID
+// session holding config.kuartalId.accessEntitlement (granted by an admin or
+// by a paid membership in Kuartal ID). Turn off with REQUIRE_LOGIN=false.
+const OPEN_API = new Set(['/api/health', '/api/me']);
+app.use('/api/*', async (c, next) => {
+  if (OPEN_API.has(c.req.path)) return next();
+  const session = await readSession(c);
+  if (hasAccess(session)) return next();
+  if (!session) return err(c, 401, 'login_required', 'Log in with your Kuartal ID to use Kuartal Terminal.');
+  return err(c, 403, 'access_required', 'Your Kuartal ID does not have Terminal Access yet.');
 });
 
 // ── Health / meta ────────────────────────────────────────────────
@@ -183,6 +196,6 @@ if (existsSync(join(config.staticDir, 'index.html'))) {
 
 if (process.env.VITEST === undefined) {
   serve({ fetch: app.fetch, port: config.port }, (info) => {
-    console.log(`Kuartal Terminal API v${VERSION} on :${info.port} · data=${config.dataMode} · auth=${authConfigured() ? 'Kuartal ID' : 'not configured (guest mode)'}${config.devGrantPro ? ' · DEV_GRANT_PRO' : ''}`);
+    console.log(`Kuartal Terminal API v${VERSION} on :${info.port} · data=${config.dataMode} · auth=${authConfigured() ? 'Kuartal ID' : 'NOT CONFIGURED'} · login ${config.requireLogin ? 'required' : 'optional'}${config.devGrantPro ? ' · DEV_GRANT_PRO' : ''}`);
   });
 }

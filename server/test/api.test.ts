@@ -3,6 +3,8 @@ import { beforeAll, describe, expect, it } from 'vitest';
 // Offline: never touch upstreams in CI.
 process.env.DATA_MODE = 'demo';
 process.env.DEV_GRANT_PRO = '';
+// This file tests the data API itself; login enforcement is covered in api-auth.test.ts.
+process.env.REQUIRE_LOGIN = 'false';
 
 let app: typeof import('../src/index').app;
 beforeAll(async () => {

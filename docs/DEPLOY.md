@@ -1,5 +1,27 @@
 # Deploying terminal.kuartalsystems.com
 
+## Current production: Hostinger Node.js Web App (since 2026-10-04)
+
+hPanel → Websites → terminal.kuartalsystems.com (Node.js app, GitHub `kuartal-id/terminal`, branch `main`,
+auto-deploy on push). Node 22.x · build `npm run build` · entry `server/dist/index.js` · output directory empty.
+Environment variables: `APP_URL`, `DATA_MODE=live`, `SESSION_SECRET` (32+ chars), `KUARTAL_ID_CLIENT_ID`,
+`KUARTAL_ID_CLIENT_SECRET`. Don't set `PORT` (Hostinger does) or `NODE_ENV` (breaks the build step).
+
+### Access control
+Visitors must log in with Kuartal ID **and** hold the `terminal.access` entitlement (else they see a
+"Terminal Access required" screen). Pro panels also need `research.premium`. Grant/revoke in
+id.kuartal.id → Admin → Users → Entitlements (optional expiry date for trials), or via a membership
+that includes it (Terminal Access, Pro, Founder, Investor, Residence, Kuartal Team). Sessions re-check
+entitlements with Kuartal ID every 15 minutes, so revocations and expired memberships apply quickly.
+Future payments: a paid subscription just creates/extends a Kuartal ID membership with
+`expires_at` = paid-through date — nothing changes in this repo.
+
+`REQUIRE_LOGIN=false` turns the gate off (local dev / public demo only).
+
+---
+
+The sections below describe the alternative self-hosted (Docker) setup.
+
 The whole app is **one Node process** (API + built web app) in **one Docker container**.
 Recommended home: your Ubuntu/Proxmox home server behind a **Cloudflare Tunnel**
 (no open ports, free TLS, hides your home IP). Cost: Rp0.

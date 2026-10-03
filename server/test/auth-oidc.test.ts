@@ -21,6 +21,11 @@ let jwk: Record<string, unknown>;
 /** What the fake token endpoint returns next (id_token claims or a raw override). */
 let nextIdToken: (nonce: string) => Promise<string | undefined>;
 let lastTokenBody: URLSearchParams | undefined;
+/** What the fake /oauth/userinfo returns next. */
+let userinfo: Record<string, unknown>;
+/** Status the fake token endpoint answers a refresh_token grant with (400 = revoked/expired). */
+let refreshStatus = 200;
+const DEFAULT_USERINFO = { sub: 'kuartal-sub-1', name: 'Test Person', email: 'p@example.com', entitlements: ['terminal.access', 'research.premium'] };
 
 async function idToken(claims: Record<string, unknown>, key: CryptoKey = privateKey): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
@@ -42,10 +47,14 @@ beforeAll(async () => {
     if (url === `${ISSUER}/oauth/jwks`) return json({ keys: [jwk] });
     if (url === `${ISSUER}/oauth/token`) {
       lastTokenBody = new URLSearchParams(String(init?.body ?? ''));
+      if (lastTokenBody.get('grant_type') === 'refresh_token') {
+        if (refreshStatus !== 200) return json({ error: 'invalid_grant' }, refreshStatus);
+        return json({ access_token: 'refreshed-access-token', refresh_token: 'rt-rotated', token_type: 'Bearer', expires_in: 3600 });
+      }
       const token = await nextIdToken(lastTokenBody.get('nonce') ?? '');
-      return json({ access_token: 'test-access-token', token_type: 'Bearer', expires_in: 3600, ...(token ? { id_token: token } : {}) });
+      return json({ access_token: 'test-access-token', refresh_token: 'rt-1', token_type: 'Bearer', expires_in: 3600, ...(token ? { id_token: token } : {}) });
     }
-    if (url === `${ISSUER}/oauth/userinfo`) return json({ sub: 'kuartal-sub-1', name: 'Test Person', email: 'p@example.com', entitlements: ['research.premium'] });
+    if (url === `${ISSUER}/oauth/userinfo`) return json(userinfo);
     throw new Error(`unexpected fetch ${url}`);
   });
 
@@ -54,6 +63,8 @@ beforeAll(async () => {
 
 beforeEach(() => {
   lastTokenBody = undefined;
+  userinfo = { ...DEFAULT_USERINFO };
+  refreshStatus = 200;
 });
 
 /** Start a login, then come back to /auth/callback with the issued state + flow cookie. */
@@ -126,5 +137,54 @@ describe('Kuartal ID login (OIDC callback)', () => {
     nextIdToken = (nonce) => idToken({ nonce }, other.privateKey);
     const { res } = await roundTrip();
     expect(reason(res)).toBe('id_token');
+  });
+});
+
+describe('Kuartal ID login (profile + periodic re-check)', () => {
+  it('rejects a userinfo profile for a different account than the id_token', async () => {
+    nextIdToken = (nonce) => idToken({ nonce });
+    userinfo = { ...DEFAULT_USERINFO, sub: 'someone-else' };
+    const { res } = await roundTrip();
+    expect(reason(res)).toBe('profile');
+    expect(sessionSet(res)).toBe(false);
+  });
+
+  it('a fresh login with terminal.access can use the data API', async () => {
+    nextIdToken = (nonce) => idToken({ nonce });
+    const { res } = await roundTrip();
+    const cookie = (res.headers.get('set-cookie') ?? '').match(/kt_session=[^;]+/)![0];
+    expect((await app.request('/api/quotes?symbols=IHSG', { headers: { Cookie: cookie } })).status).toBe(200);
+  });
+
+  // A session whose last check is older than 15 minutes triggers a refresh.
+  const staleSession = async (ent: string[]) => {
+    const { sealSession } = await import('../src/auth');
+    return `kt_session=${await sealSession({ sub: 'kuartal-sub-1', name: 'Test', ent, rt: `rt-${Math.random()}`, chk: 0 })}`;
+  };
+
+  it('refreshes entitlements and rotates the refresh token', async () => {
+    const res = await app.request('/api/quotes?symbols=IHSG', { headers: { Cookie: await staleSession(['terminal.access']) } });
+    expect(res.status).toBe(200);
+    expect(lastTokenBody?.get('grant_type')).toBe('refresh_token');
+    expect(res.headers.get('set-cookie') ?? '').toContain('kt_session=ey');
+  });
+
+  it('signs out when the user revoked the app on Kuartal ID', async () => {
+    refreshStatus = 400;
+    const res = await app.request('/api/quotes?symbols=IHSG', { headers: { Cookie: await staleSession(['terminal.access']) } });
+    expect(res.status).toBe(401);
+    expect(res.headers.get('set-cookie') ?? '').toMatch(/kt_session=;/);
+  });
+
+  it('blocks access within one re-check after an admin removes terminal.access', async () => {
+    userinfo = { ...DEFAULT_USERINFO, entitlements: ['kuartal.member'] };
+    const res = await app.request('/api/quotes?symbols=IHSG', { headers: { Cookie: await staleSession(['terminal.access']) } });
+    expect(res.status).toBe(403);
+  });
+
+  it('signs out if the refreshed profile belongs to a different account', async () => {
+    userinfo = { ...DEFAULT_USERINFO, sub: 'someone-else' };
+    const res = await app.request('/api/quotes?symbols=IHSG', { headers: { Cookie: await staleSession(['terminal.access']) } });
+    expect(res.status).toBe(401);
   });
 });

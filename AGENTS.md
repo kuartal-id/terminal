@@ -40,23 +40,34 @@ Hard product constraints from the owner — do not violate:
 ## Kuartal ID integration (status — keep this current)
 
 "Log in with Kuartal ID" (OIDC code + PKCE S256 against https://id.kuartal.id) lives in `server/src/auth.ts`
-(protected). Login is optional on `main` (guests get free panels; Pro needs the `research.premium` entitlement).
-Open PR #1 (`ai/claude/require-kuartal-id`) makes login + `terminal.access` mandatory and re-checks entitlements
-every 15 min via an encrypted session with the refresh token. 'Continue with Google' is provided by Kuartal ID
-itself — never add Google/social login code here.
+(protected). **Login is mandatory** (`REQUIRE_LOGIN`, default true): every `/api/*` route except `/api/health`
+and `/api/me` needs a session holding `terminal.access` (401 `login_required` / 403 `access_required`), and the
+web app shows `AccessGate` until `/api/me` says `access: true`. Pro panels additionally need `research.premium`.
+'Continue with Google' and consent ("Don't ask me again") are provided by Kuartal ID itself — never add
+Google/social login code here.
 
-- **id_token is mandatory and fully verified** (`jose` `jwtVerify`): RS256 signature via JWKS, `iss` ==
-  `KUARTAL_ID_ISSUER`, `aud` == `KUARTAL_ID_CLIENT_ID`, `exp`/`iat` (60s tolerance), and `nonce` must be present and
-  equal the one stored in the signed `kt_oidc` flow cookie. Missing id_token or nonce → login refused
-  (`/?auth=error&reason=id_token|nonce`).
-- The nonce is sent on `/oauth/authorize` **and** in the `/oauth/token` body, because kuartal-login currently reads it
-  from the token request (its `TokenController`). Without the token-body copy every login fails with `reason=nonce`.
-- Entitlements come from `/oauth/userinfo`; the session cookie is signed (HS256, `SESSION_SECRET`).
-- **Env:** `APP_URL`, `SESSION_SECRET` (≥32 chars), `KUARTAL_ID_ISSUER` (default `https://id.kuartal.id`; must equal the
-  id_token `iss`), `KUARTAL_ID_CLIENT_ID`, `KUARTAL_ID_CLIENT_SECRET`, `PREMIUM_ENTITLEMENT`, `UPGRADE_URL`.
-- **Redirect URI to register on the Kuartal ID client:** `https://terminal.kuartalsystems.com/auth/callback`.
-- Deploy is manual (Docker on a home server — see docs/DEPLOY.md); merging does not deploy.
-- Tests: `server/test/auth-oidc.test.ts` (fakes Kuartal ID with a generated RSA key/JWKS and a stubbed `fetch`).
+- **id_token is mandatory and fully verified** (`jose` `jwtVerify`): RS256 via JWKS, `iss` == `KUARTAL_ID_ISSUER`,
+  `aud` == `KUARTAL_ID_CLIENT_ID`, `exp`/`iat` (60s tolerance), `nonce` == the one in the signed `kt_oidc` flow
+  cookie. The `/oauth/userinfo` `sub` must equal the id_token `sub`. Failures → `/?auth=error&reason=…`
+  (plain-language text in `web/src/lib/loginErrors.ts`).
+- The nonce goes on `/oauth/authorize` (Kuartal ID binds it to the code since 2026-10-06) **and** in the
+  `/oauth/token` body (fallback for older Kuartal ID builds). Keep both.
+- **Session:** `kt_session` cookie, encrypted (A256GCM, key derived from `SESSION_SECRET`), 30 days, holding
+  sub/name/email/entitlements + the Kuartal ID refresh token. Every 15 min the server refreshes (refresh tokens
+  rotate; parallel requests share one refresh) and re-reads `/oauth/userinfo`: revoked app or expired token →
+  signed out; `terminal.access` removed or membership lapsed → 403; different `sub` → signed out.
+  Kuartal ID unreachable → last known entitlements are kept.
+- Logout clears the cookie and sends the browser to Kuartal ID's `end_session_endpoint` (`/oauth/logout`) with
+  `post_logout_redirect_uri` = `APP_URL/`.
+- **Env:** `APP_URL`, `SESSION_SECRET` (≥32 chars), `KUARTAL_ID_ISSUER` (default `https://id.kuartal.id`),
+  `KUARTAL_ID_CLIENT_ID`, `KUARTAL_ID_CLIENT_SECRET`, optional `REQUIRE_LOGIN`, `ACCESS_ENTITLEMENT`,
+  `PREMIUM_ENTITLEMENT`, `UPGRADE_URL`.
+- **Kuartal ID side:** confidential client "Kuartal Terminal", redirect URI
+  `https://terminal.kuartalsystems.com/auth/callback`; entitlement `terminal.access` + "Terminal Access"
+  membership come from kuartal-id/kuartal-login (`CatalogSeeder`). Payments later = membership `expires_at`.
+- **Deploy:** Hostinger Node.js Web App, auto-deploys from `main` (see docs/DEPLOY.md). Merging = production.
+- Tests: `server/test/auth-oidc.test.ts` (fake Kuartal ID: RSA JWKS + stubbed `fetch`, incl. refresh re-checks)
+  and `server/test/api-auth.test.ts` (gate).
 
 ## Commands
 

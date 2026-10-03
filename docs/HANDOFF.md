@@ -39,6 +39,20 @@ Next agent should: concrete next steps
 
 ---
 
+## 2026-10-04 — Claude (Opus) — Require Kuartal ID login + terminal.access
+
+Branch/PR: ai/claude/require-kuartal-id (owner-approved in chat; touches protected auth.ts, config.ts, shared/types.ts)
+Changed: server gate on all /api/* except /api/health and /api/me (401 login_required / 403 access_required);
+`Me.access` + `Me.loginRequired`; AccessGate screen (login / no-access) shown before any data loads;
+session cookie now encrypted (A256GCM) and holds the Kuartal ID refresh token — entitlements re-checked every
+15 min with per-token de-duplication (Kuartal ID rotates refresh tokens with reuse detection); session 30 days.
+New env: REQUIRE_LOGIN (default true), ACCESS_ENTITLEMENT (default terminal.access). Production moved to Hostinger
+Node.js hosting (see DEPLOY.md). Companion PR: kuartal-id/kuartal-login#1 (adds terminal.access + Terminal Access tier).
+Verified: npm run check (39 server + 21 web tests, incl. 6 new gate tests); screenshots of both gate states.
+NOT verified: a real login round-trip against id.kuartal.id (needs the OAuth client created on the server).
+Next agent should: after the first real login, confirm refresh-token re-check works (Hostinger logs);
+consider an admin shortcut on id.kuartal.id listing who has terminal.access.
+
 ## 2026-10-03 — Claude (Opus) — MVP v0.1.0 built from an empty repo
 
 Branch/PR: initial commit on `main` (repo was empty); restore-point branch `stable/2026-10-03-mvp` (tags can't be created from the build sandbox).

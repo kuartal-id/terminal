@@ -12,9 +12,10 @@ export async function loadMe() {
   } catch {
     useMeStore.setState({
       loaded: true,
-      me: { authenticated: false, authConfigured: false, tier: 'guest', entitlements: [], loginUrl: '/auth/login', logoutUrl: '/auth/logout', upgradeUrl: 'https://kuartal.id/membership' },
+      me: { authenticated: false, authConfigured: false, tier: 'guest', entitlements: [], access: false, loginRequired: true, loginUrl: '/auth/login', logoutUrl: '/auth/logout', upgradeUrl: 'https://kuartal.id/membership' },
     });
   }
 }
 
 export const useMe = () => useMeStore((s) => s.me);
+export const useMeLoaded = () => useMeStore((s) => s.loaded);

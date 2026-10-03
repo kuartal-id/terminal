@@ -160,6 +160,10 @@ export interface Me {
   name?: string;
   email?: string;
   entitlements: string[];
+  /** May use the terminal at all (signed in with Kuartal ID + terminal.access, or login not required). */
+  access: boolean;
+  /** Server requires Kuartal ID login + terminal.access to use the terminal. */
+  loginRequired: boolean;
   loginUrl: string;
   logoutUrl: string;
   upgradeUrl: string;
@@ -167,5 +171,5 @@ export interface Me {
 
 export interface ApiError {
   error: string;
-  code: 'not_found' | 'bad_request' | 'premium_required' | 'login_required' | 'upstream';
+  code: 'not_found' | 'bad_request' | 'premium_required' | 'login_required' | 'access_required' | 'upstream';
 }

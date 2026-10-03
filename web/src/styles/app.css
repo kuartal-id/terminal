@@ -729,3 +729,22 @@ button.chip:hover, .chip.on { border-color: var(--accent); color: var(--accent);
 .research-card:nth-child(2) { grid-column: span 5; }
 .research-card-label { padding: 7px 9px; border: 1px solid var(--line); border-bottom: 0; border-radius: 8px 8px 0 0; background: var(--panel-head); color: var(--text-mute); font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
 .research-card .panel { border-radius: 0 0 var(--radius) var(--radius); min-height: 260px; }
+
+/* Access gate (login / Terminal Access required) */
+.access-gate {
+  min-height: 100%; display: grid; place-items: center; padding: 24px 16px; overflow: auto;
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--grid-dot) 1px, transparent 1px), radial-gradient(ellipse at top, var(--accent-soft), transparent 60%);
+  background-size: 18px 18px, 100% 100%;
+}
+.access-card {
+  width: min(440px, 100%); text-align: center; display: grid; gap: 12px; justify-items: center;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 32px 28px; box-shadow: var(--shadow);
+  line-height: 1.55;
+}
+.access-card h1 { font-family: var(--font-display); font-weight: 600; font-size: 20px; margin: 6px 0 0; }
+.access-card p { margin: 0; color: var(--text-dim); }
+.access-card .small { font-size: 12px; }
+.access-card .disclaimer { border: 0; padding: 4px 0 0; }
+.gate-cta { height: 40px; padding: 0 20px; font-size: 14px; }
+.gate-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }

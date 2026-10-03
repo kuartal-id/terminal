@@ -1,0 +1,19 @@
+# Protected paths — changes need the owner's approval (PR label "owner-approved").
+# One glob per line. Checked by scripts/check-guardrails.mjs in CI.
+# These are the parts that keep the terminal deployable, secure, and compatible
+# with layouts already saved in users' browsers.
+
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.ai/**
+scripts/check-guardrails.mjs
+.github/**
+Dockerfile
+docker-compose.yml
+.env.example
+server/src/auth.ts
+server/src/config.ts
+shared/types.ts
+web/src/lib/store.ts
+desktop/src-tauri/tauri.conf.json

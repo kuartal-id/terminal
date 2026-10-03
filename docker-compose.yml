@@ -1,0 +1,28 @@
+# Home-server deployment: the app + a Cloudflare Tunnel (no open ports needed).
+# 1. cp .env.example .env  and fill it in
+# 2. Put your tunnel token in .env as CLOUDFLARE_TUNNEL_TOKEN
+# 3. docker compose up -d --build
+# See docs/DEPLOY.md for the full walkthrough.
+
+services:
+  terminal:
+    build: .
+    image: kuartal-terminal:latest
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "127.0.0.1:8787:8787"   # local only; the tunnel reaches it over the docker network
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - terminal
+    profiles: ["tunnel"]

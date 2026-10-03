@@ -1,0 +1,75 @@
+/*
+ * Kuartal Terminal design tokens.
+ * Derived from kuartal-id/kuartal-brand (navy #18333d, navy-deep #0b1319,
+ * green #36cc64, Poppins + Arial Nova). Change brand colours there first,
+ * then mirror them here. See AGENTS.md → "Design system".
+ */
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0b1319;            /* navy-900 / navy-deep */
+  --bg-raised: #0f1c22;     /* surface-dark */
+  --panel: #0f1c22;
+  --panel-alt: #152730;     /* surface-dark-alt */
+  --panel-head: #122730;    /* navy-800 */
+  --line: #1f3a45;
+  --line-soft: #172c35;
+  --text: #e8f0f2;
+  --text-dim: #a7c1c8;      /* navy-200 */
+  --text-mute: #6c8a94;
+  --accent: #36cc64;        /* Kuartal green */
+  --accent-strong: #5fe092;
+  --accent-ink: #0b1319;
+  --accent-soft: rgba(54, 204, 100, 0.12);
+  --up: #36cc64;
+  --up-soft: rgba(54, 204, 100, 0.14);
+  --down: #ff6464;
+  --down-soft: rgba(255, 100, 100, 0.14);
+  --warn: #f5b942;
+  --warn-soft: rgba(245, 185, 66, 0.14);
+  --info: #5cb8d6;
+  --info-soft: rgba(92, 184, 214, 0.14);
+  --focus: #5fe092;
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+  --grid-dot: rgba(167, 193, 200, 0.06);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #eef3f4;            /* navy-50 */
+  --bg-raised: #ffffff;
+  --panel: #ffffff;
+  --panel-alt: #f7f9f9;
+  --panel-head: #f7f9f9;
+  --line: #d3e0e3;
+  --line-soft: #e1e8ed;
+  --text: #0b1319;
+  --text-dim: #2c5f6c;
+  --text-mute: #6c7a86;
+  --accent: #1f8642;
+  --accent-strong: #28a852;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(40, 168, 82, 0.1);
+  --up: #1f8642;
+  --up-soft: rgba(31, 134, 66, 0.1);
+  --down: #d23c3c;
+  --down-soft: rgba(210, 60, 60, 0.1);
+  --warn: #a86b00;
+  --warn-soft: rgba(168, 107, 0, 0.1);
+  --info: #1d6f8a;
+  --info-soft: rgba(29, 111, 138, 0.1);
+  --focus: #28a852;
+  --shadow: 0 8px 24px rgba(11, 19, 25, 0.1);
+  --grid-dot: rgba(24, 51, 61, 0.06);
+}
+
+:root {
+  --font-display: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Arial Nova', Arial, Helvetica, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --topbar-h: 52px;
+  --tape-h: 30px;
+  --rail-w: 56px;
+}

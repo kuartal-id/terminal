@@ -1,0 +1,14 @@
+node_modules/
+dist/
+*.log
+.env
+.env.*
+!.env.example
+.DS_Store
+coverage/
+.vite/
+desktop/src-tauri/target/
+desktop/src-tauri/gen/
+
+# desktop offline fallback page is source, not build output
+!desktop/dist/

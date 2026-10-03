@@ -1,0 +1,25 @@
+{
+  "name": "kuartal-terminal",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Kuartal Terminal — free market-insight terminal for Kuartal ID members (terminal.kuartalsystems.com)",
+  "type": "module",
+  "workspaces": [
+    "web",
+    "server"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "concurrently -n api,web -c green,cyan \"npm:dev -w server\" \"npm:dev -w web\"",
+    "build": "npm run build -w web && npm run build -w server",
+    "start": "node server/dist/index.js",
+    "typecheck": "npm run typecheck -w web && npm run typecheck -w server",
+    "test": "npm run test -w server && npm run test -w web",
+    "check": "npm run typecheck && npm test && npm run build && node scripts/check-guardrails.mjs"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}

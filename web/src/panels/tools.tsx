@@ -122,14 +122,14 @@ export function AskPanel({ report }: PanelProps) {
   const [log, setLog] = useState<Msg[]>([
     {
       who: 'bot',
-      text: 'Hi — I\'m Ask Kuartal. Tell me what you want to look at and I\'ll set up the panels. English or Bahasa both work.',
-      suggestions: ['How risky is the market today?', 'Show me bank stocks', 'Compare rupiah, gold and IHSG', 'Inflasi ASEAN', 'News about coal'],
+      text: 'Ask Kuartal is coming soon. The research terminal is ready today; the full self-hosted AI assistant will arrive in a later release.',
+      suggestions: ['Show US markets', 'Open Indonesia SBN', 'Show bonds and Treasuries', 'Show reksa dana research'],
     },
   ]);
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
   const end = useRef<HTMLDivElement>(null);
-  useEffect(() => report({ provider: 'Kuartal rules engine (offline) · AI model plugs in later', source: 'static' }), [report]);
+  useEffect(() => report({ provider: 'Ask Kuartal · Coming soon', source: 'static' }), [report]);
   useEffect(() => end.current?.scrollIntoView({ block: 'end' }), [log]);
 
   const send = async (q: string) => {

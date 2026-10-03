@@ -8,6 +8,7 @@ import { useQuoteMap } from '../panels/markets';
 import { CommandBar } from './CommandBar';
 import { I } from './Icons';
 import { Workspace } from './Workspace';
+import { ResearchPage, type PageKey } from './ResearchPage';
 
 function Clock() {
   const [now, setNow] = useState(() => new Date());
@@ -167,6 +168,19 @@ function Tabs() {
   );
 }
 
+function PageNav({ page, setPage }: { page: PageKey | 'dashboard'; setPage: (p: PageKey | 'dashboard') => void }) {
+  const items: Array<[PageKey | 'dashboard', string]> = [
+    ['dashboard', 'Dashboard'], ['markets', 'Markets'], ['indonesia', 'Indonesia'], ['fixed-income', 'Bonds & Rates'],
+    ['macro', 'Macro'], ['crypto', 'Digital Assets'], ['research', 'Research'], ['tools', 'Tools'],
+  ];
+  return <nav className="page-nav" aria-label="Terminal pages">
+    {items.map(([key, label]) => <button key={key} className={page === key ? 'on' : ''} onClick={() => {
+      setPage(key);
+      history.replaceState(null, '', key === 'dashboard' ? location.pathname : `#${key}`);
+    }}>{label}</button>)}
+  </nav>;
+}
+
 const TAPE = ['^JKSE', 'IDR=X', 'GC=F', 'BZ=F', 'MTF=F', '^GSPC', '^IXIC', '^N225', '^HSI', 'DX-Y.NYB', '^TNX', 'BTCUSDT', 'ETHUSDT', 'BBCA.JK', 'BBRI.JK', 'TLKM.JK'];
 
 function TickerTape() {
@@ -208,6 +222,10 @@ function Toast() {
 }
 
 export function DesktopShell() {
+  const [page, setPage] = useState<PageKey | 'dashboard'>(() => {
+    const key = location.hash.replace('#', '') as PageKey;
+    return key && ['markets','indonesia','fixed-income','macro','crypto','research','tools'].includes(key) ? key : 'dashboard';
+  });
   return (
     <div className="app">
       <header className="topbar">
@@ -224,8 +242,9 @@ export function DesktopShell() {
       </header>
       <Rail />
       <main className="main">
-        <Tabs />
-        <Workspace />
+        <PageNav page={page} setPage={setPage} />
+        {page === 'dashboard' ? <Tabs /> : <div className="page-spacer" />}
+        {page === 'dashboard' ? <Workspace /> : <ResearchPage page={page} />}
       </main>
       <TickerTape />
       <Toast />

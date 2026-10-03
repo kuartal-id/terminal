@@ -15,12 +15,16 @@ export function Workspace() {
         <div className="empty-ws">
           <div>
             <h2>Empty workspace</h2>
-            <p>Type in the command bar (press /) or pick a panel from the left rail.</p>
-            <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <p>This workspace is empty. Restore a research dashboard or build one yourself from the command bar and left navigation.</p>
+            <div className="empty-actions">
               <button className="btn" onClick={() => openPanel('PLS')}>Kuartal Pulse</button>
               <button className="btn" onClick={() => openPanel('CHT', { symbol: '^JKSE', linked: true })}>Chart IHSG</button>
               <button className="btn" onClick={() => openPanel('NWS')}>News</button>
-              <button className="btn" onClick={() => openPanel('ASK')}>Ask Kuartal</button>
+              <button className="btn" onClick={() => openPanel('USA')}>US Markets</button>
+              <button className="btn" onClick={() => openPanel('BND')}>Bonds & Treasuries</button>
+              <button className="btn" onClick={() => openPanel('SBN')}>Indonesia SBN</button>
+              <button className="btn" onClick={() => openPanel('FND')}>Funds</button>
+              <button className="btn" onClick={() => openPanel('ASK')}>Ask Kuartal · Coming soon</button>
             </div>
           </div>
         </div>

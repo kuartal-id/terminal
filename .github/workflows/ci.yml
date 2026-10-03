@@ -5,6 +5,7 @@ on:
   push:
     branches: ['**']
   pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
 
 permissions:
   contents: read
@@ -32,11 +33,17 @@ jobs:
           PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
       - name: Smoke test the production server (demo data)
         run: |
+          # Production default: data endpoints require Kuartal ID login.
           DATA_MODE=demo PORT=8787 node server/dist/index.js &
           sleep 2
           curl -fsS localhost:8787/api/health
-          curl -fsS "localhost:8787/api/quotes?symbols=IHSG,BTC" > /dev/null
+          test "$(curl -s -o /dev/null -w '%{http_code}' 'localhost:8787/api/quotes?symbols=IHSG')" = 401
           curl -fsS localhost:8787/ | grep -q "Kuartal Terminal"
+          kill %1
+          # With the gate off, the data API itself works.
+          DATA_MODE=demo REQUIRE_LOGIN=false PORT=8788 node server/dist/index.js &
+          sleep 2
+          curl -fsS "localhost:8788/api/quotes?symbols=IHSG,BTC" > /dev/null
 
   docker:
     name: Docker image builds

@@ -139,8 +139,8 @@ export function AssetHubPanel({ report }: PanelProps) {
   useEffect(() => report({ source: 'static', provider: 'Kuartal asset catalogue' }), [report]);
   return (
     <div className="calc">
-      <div className="calc-card"><h4>Equities</h4><p className="dim">IDX and US equity quotes, charts, watchlists and technical analytics.</p><SymbolButton symbol="^GSPC" /></div>
-      <div className="calc-card"><h4>Bonds & Rates</h4><p className="dim">US Treasury curve, Treasury ETFs and the Indonesia SBN research hub.</p><SymbolButton symbol="^TNX" /></div>
+      <div className="calc-card"><h4>Equities</h4><p className="dim">IDX and US equity quotes, charts, watchlists and technical analytics.</p><SymbolButton symbol="^GSPC" label="S&P 500" /></div>
+      <div className="calc-card"><h4>Bonds & Rates</h4><p className="dim">US Treasury curve, Treasury ETFs and the Indonesia SBN research hub.</p><SymbolButton symbol="^TNX" label="US 10Y Treasury" /></div>
       <div className="calc-card"><h4>Funds</h4><p className="dim">Money market, bond, equity, mixed and fixed-income research taxonomy, with OJK source handoff.</p></div>
       <div className="calc-card"><h4>Cross-Asset</h4><p className="dim">FX, commodities, crypto, macro, correlation and Kuartal Pulse remain available from the same dashboard.</p></div>
     </div>

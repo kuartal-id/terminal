@@ -212,7 +212,8 @@ a:hover { text-decoration: underline; }
   align-items: center;
   padding: 8px 0;
   gap: 2px;
-  overflow-y: auto;
+  overflow: visible;
+  position: relative;
 }
 .rail button {
   width: 44px;
@@ -231,6 +232,22 @@ a:hover { text-decoration: underline; }
 .rail button:hover, .rail button.on { background: var(--accent-soft); color: var(--accent); }
 .rail svg { width: 18px; height: 18px; }
 .rail hr { width: 28px; border: 0; border-top: 1px solid var(--line); margin: 6px 0; }
+.rail-group { position: relative; width: 100%; display: grid; justify-items: center; }
+.rail-flyout {
+  position: absolute;
+  left: calc(var(--rail-w) - 2px);
+  top: 0;
+  width: 330px;
+  max-height: min(72vh, 620px);
+  overflow: auto;
+  z-index: 100;
+  padding: 6px;
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+}
+.rail-flyout .cmd-item { grid-template-columns: 48px 1fr auto; }
 
 /* Main / workspace */
 .main { grid-area: main; display: grid; grid-template-rows: 38px 1fr; min-width: 0; min-height: 0; }
@@ -271,7 +288,9 @@ a:hover { text-decoration: underline; }
   background-size: 18px 18px;
   padding: 2px;
 }
-.empty-ws { height: 100%; display: grid; place-items: center; text-align: center; color: var(--text-dim); padding: 24px; }
+.empty-ws { height: 100%; min-height: 420px; display: grid; place-items: center; text-align: center; color: var(--text-dim); padding: 24px; }
+.empty-ws > div { max-width: 620px; }
+.empty-ws .empty-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
 .empty-ws h2 { font-family: var(--font-display); font-weight: 600; color: var(--text); margin: 0 0 8px; }
 
 /* Panels */

@@ -20,7 +20,7 @@ Next agent should: concrete next steps
 
 ## 2026-10-03 — Claude (Opus) — MVP v0.1.0 built from an empty repo
 
-Branch/PR: initial commit on `main` (repo was empty); restore point tag `stable/2026-10-03-mvp`.
+Branch/PR: initial commit on `main` (repo was empty); restore-point branch `stable/2026-10-03-mvp` (tags can't be created from the build sandbox).
 
 Changed: everything — web app (17 panels), API server, free data adapters, Kuartal ID login, Pro gating,
 mobile shell + PWA, Tauri desktop wrapper, Docker + Cloudflare Tunnel deploy, CI, guardrails, docs.

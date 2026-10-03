@@ -60,14 +60,26 @@ const protectedGlobs = read('.ai/protected.txt')
   .filter((l) => l && !l.startsWith('#'));
 const protectedRes = protectedGlobs.map(globToRe);
 
-const base = process.env.BASE_REF && !/^0+$/.test(process.env.BASE_REF) ? process.env.BASE_REF : 'origin/main';
+// Compare against: explicit BASE_REF (CI) → origin/main → local main (when on another branch).
+const candidates = [process.env.BASE_REF && !/^0+$/.test(process.env.BASE_REF) ? process.env.BASE_REF : '', 'origin/main', 'main'].filter(Boolean);
 let changed = null;
+let current = '';
 try {
-  sh(`git rev-parse --verify --quiet ${base}^{commit}`);
-  changed = sh(`git diff --name-only ${base}...HEAD`).split('\n').filter(Boolean);
+  current = sh('git rev-parse --abbrev-ref HEAD');
 } catch {
-  warnings.push(`Could not diff against ${base} — skipped protected-path check (fine for a first commit).`);
+  /* detached or no git */
 }
+for (const cand of candidates) {
+  if (cand === 'main' && current === 'main') continue; // comparing main to itself proves nothing
+  try {
+    sh(`git rev-parse --verify --quiet ${cand}^{commit}`);
+    changed = sh(`git diff --name-only ${cand}...HEAD`).split('\n').filter(Boolean);
+    break;
+  } catch {
+    /* try next */
+  }
+}
+if (!changed) warnings.push('No base branch to compare with — skipped protected-path check (fine for a first commit; run `git fetch origin` to enable it).');
 const labels = (process.env.PR_LABELS ?? '').split(',').map((s) => s.trim());
 const approved = labels.includes('owner-approved');
 if (changed) {

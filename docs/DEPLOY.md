@@ -75,7 +75,7 @@ git pull
 docker compose --profile tunnel up -d --build
 ```
 
-Roll back to the known-good MVP any time: `git checkout stable/2026-10-03-mvp && docker compose up -d --build`.
+Roll back to the known-good MVP any time: `git fetch origin && git checkout origin/stable/2026-10-03-mvp && docker compose up -d --build` (return with `git checkout main`).
 
 ## Alternatives
 - **Any VPS** (e.g. Hostinger VPS): same Docker steps; point DNS at the VPS and use Caddy/Nginx for TLS, or still use the tunnel.

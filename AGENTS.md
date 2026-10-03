@@ -26,7 +26,7 @@ Hard product constraints from the owner — do not violate:
 ## Golden rules (all agents)
 
 1. **Never push to `main`.** `main` is production. Create a branch named `ai/<agent>/<topic>` (e.g. `ai/codex/add-etf-panel`), commit there, open a pull request. Diemas merges.
-2. **Never** force-push, rewrite published history, delete branches/tags you didn't create, or delete the `stable/*` restore-point tags.
+2. **Never** force-push, rewrite published history, delete branches you didn't create, or touch the `stable/*` restore-point branches (they are frozen known-good versions).
 3. **Stay in scope.** Only touch files your task needs. No drive-by reformatting, renaming, moving files, or "cleanups". No mass dependency upgrades unless that *is* the task.
 4. **Protected paths** (listed in `.ai/protected.txt`) need owner approval. CI fails if they change without the `owner-approved` PR label. Explain in the PR why you need to touch them.
 5. **Stable contracts** (`.ai/contracts.json`) must not break: panel codes, the `localStorage` key, API routes, the Pro entitlement name. Users' saved layouts and other Kuartal apps depend on them.

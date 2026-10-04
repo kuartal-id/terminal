@@ -85,6 +85,31 @@ export const MARKETS: Instrument[] = [
   { symbol: 'PSEI.PS', label: 'PSEI', name: 'PSE Composite (Philippines)', assetClass: 'index', group: 'Asia', currency: 'PHP' },
   { symbol: '^KS11', label: 'KOSPI', name: 'KOSPI Composite', assetClass: 'index', group: 'Asia', currency: 'KRW' },
   { symbol: '^AXJO', label: 'ASX200', name: 'S&P/ASX 200', assetClass: 'index', group: 'Asia', currency: 'AUD' },
+  // ASEAN & Southeast Asia benchmarks
+  { symbol: '^STI', label: 'STI', name: 'Straits Times Index (Singapore)', assetClass: 'index', group: 'ASEAN', currency: 'SGD' },
+  { symbol: '^KLSE', label: 'KLCI', name: 'FTSE Bursa Malaysia KLCI', assetClass: 'index', group: 'ASEAN', currency: 'MYR' },
+  { symbol: '^SET.BK', label: 'SET', name: 'SET Index (Thailand)', assetClass: 'index', group: 'ASEAN', currency: 'THB' },
+  { symbol: 'PSEI.PS', label: 'PSEI', name: 'PSE Composite (Philippines)', assetClass: 'index', group: 'ASEAN', currency: 'PHP' },
+  { symbol: '^VNINDEX', label: 'VNINDEX', name: 'VN-Index (Vietnam)', assetClass: 'index', group: 'ASEAN', currency: 'VND' },
+  // Major Asia-Pacific benchmarks
+  { symbol: '^N225', label: 'NIKKEI', name: 'Nikkei 225 (Japan)', assetClass: 'index', group: 'Asia-Pacific', currency: 'JPY' },
+  { symbol: '^HSI', label: 'HSI', name: 'Hang Seng Index (Hong Kong)', assetClass: 'index', group: 'Asia-Pacific', currency: 'HKD' },
+  { symbol: '^KS11', label: 'KOSPI', name: 'KOSPI Composite (South Korea)', assetClass: 'index', group: 'Asia-Pacific', currency: 'KRW' },
+  { symbol: '^NSEI', label: 'NIFTY', name: 'NIFTY 50 (India)', assetClass: 'index', group: 'Asia-Pacific', currency: 'INR' },
+  { symbol: '000001.SS', label: 'SHCOMP', name: 'Shanghai Composite (China)', assetClass: 'index', group: 'Asia-Pacific', currency: 'CNY' },
+  { symbol: '^AXJO', label: 'ASX200', name: 'S&P/ASX 200 (Australia)', assetClass: 'index', group: 'Asia-Pacific', currency: 'AUD' },
+  // Europe, UK, Canada and Saudi Arabia
+  { symbol: '^FTSE', label: 'FTSE100', name: 'FTSE 100 (London)', assetClass: 'index', group: 'Europe & Canada', currency: 'GBP' },
+  { symbol: '^GDAXI', label: 'DAX', name: 'DAX 40 (Germany)', assetClass: 'index', group: 'Europe & Canada', currency: 'EUR' },
+  { symbol: '^FCHI', label: 'CAC40', name: 'CAC 40 (France)', assetClass: 'index', group: 'Europe & Canada', currency: 'EUR' },
+  { symbol: '^STOXX50E', label: 'STOXX50', name: 'Euro Stoxx 50 (Eurozone)', assetClass: 'index', group: 'Europe & Canada', currency: 'EUR' },
+  { symbol: '^IBEX', label: 'IBEX35', name: 'IBEX 35 (Spain)', assetClass: 'index', group: 'Europe & Canada', currency: 'EUR' },
+  { symbol: '^FTMIB', label: 'FTSEMIB', name: 'FTSE MIB (Italy)', assetClass: 'index', group: 'Europe & Canada', currency: 'EUR' },
+  { symbol: '^SSMI', label: 'SMI', name: 'Swiss Market Index', assetClass: 'index', group: 'Europe & Canada', currency: 'CHF' },
+  { symbol: '^AEX', label: 'AEX', name: 'AEX Index (Netherlands)', assetClass: 'index', group: 'Europe & Canada', currency: 'EUR' },
+  { symbol: '^GSPTSE', label: 'TSX', name: 'S&P/TSX Composite (Canada)', assetClass: 'index', group: 'Europe & Canada', currency: 'CAD' },
+  { symbol: '^TASI.SR', label: 'TASI', name: 'Tadawul All Share Index (Saudi Arabia)', assetClass: 'index', group: 'Middle East', currency: 'SAR' },
+  // US & Europe
   // US & Europe
   { symbol: '^GSPC', label: 'SPX', name: 'S&P 500', assetClass: 'index', group: 'US & Europe', currency: 'USD' },
   { symbol: '^IXIC', label: 'NASDAQ', name: 'Nasdaq Composite', assetClass: 'index', group: 'US & Europe', currency: 'USD' },

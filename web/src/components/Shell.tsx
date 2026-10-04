@@ -170,7 +170,7 @@ function Tabs() {
 
 function PageNav({ page, setPage }: { page: PageKey | 'dashboard'; setPage: (p: PageKey | 'dashboard') => void }) {
   const items: Array<[PageKey | 'dashboard', string]> = [
-    ['dashboard', 'Dashboard'], ['markets', 'Markets'], ['indonesia', 'Indonesia'], ['fixed-income', 'Bonds & Rates'],
+    ['dashboard', 'Dashboard'], ['global', 'Global Markets'], ['markets', 'Markets'], ['indonesia', 'Indonesia'], ['fixed-income', 'Bonds & Rates'],
     ['macro', 'Macro'], ['crypto', 'Digital Assets'], ['research', 'Research'], ['tools', 'Tools'],
   ];
   return <nav className="page-nav" aria-label="Terminal pages">
@@ -224,7 +224,7 @@ function Toast() {
 export function DesktopShell() {
   const [page, setPage] = useState<PageKey | 'dashboard'>(() => {
     const key = location.hash.replace('#', '') as PageKey;
-    return key && ['markets','indonesia','fixed-income','macro','crypto','research','tools'].includes(key) ? key : 'dashboard';
+    return key && ['global','markets','indonesia','fixed-income','macro','crypto','research','tools'].includes(key) ? key : 'dashboard';
   });
   return (
     <div className="app">

@@ -7,6 +7,13 @@ import { ErrorBox, Loading, SymbolButton } from '../components/bits';
 import { useStore } from '../lib/store';
 import type { PanelProps } from './types';
 
+const GLOBAL_SYMBOLS = ['^GSPC','^IXIC','^FTSE','^GDAXI','^FCHI','^STOXX50E','^GSPTSE','^N225','^HSI','^KS11','^NSEI','000001.SS','^AXJO','^TASI.SR','^JKSE','^STI','^KLSE','^SET.BK','PSEI.PS','^VNINDEX'];
+const ASEAN_COVERAGE = [
+  ['Indonesia','^JKSE','Jakarta Composite','IDR'],['Malaysia','^KLSE','FTSE Bursa Malaysia KLCI','MYR'],['Singapore','^STI','Straits Times','SGD'],
+  ['Thailand','^SET.BK','SET Index','THB'],['Philippines','PSEI.PS','PSE Composite','PHP'],['Vietnam','^VNINDEX','VN-Index','VND'],
+  ['Brunei','—','No broad public benchmark wired yet','BND'],['Cambodia','—','No broad public benchmark wired yet','KHR'],['Laos','—','No broad public benchmark wired yet','LAK'],['Myanmar','—','No broad public benchmark wired yet','MMK'],
+] as const;
+
 const US_SYMBOLS = ['^GSPC', '^IXIC', '^DJI', '^RUT', 'AAPL', 'MSFT', 'NVDA', 'AMZN', 'META', 'GOOGL', 'TSLA', 'JPM', 'BRK-B', 'XOM', 'UNH', 'AVGO', 'SPY', 'QQQ', 'IWM', 'EIDO'];
 const BOND_SYMBOLS = ['^IRX', '^FVX', '^TNX', '^TYX', 'TLT', 'IEF', 'SHY', 'LQD', 'HYG', 'TIP', 'AGG'];
 const FUND_CATEGORIES = [
@@ -50,6 +57,11 @@ function QuoteTable({ symbols, title }: { symbols: string[]; title: string }) {
       </table>
     </div>
   );
+}
+
+export function GlobalMarketsPanel({ report }: PanelProps) {
+  useEffect(() => report({ source: 'delayed', provider: 'Yahoo Finance (unofficial chart API)' }), [report]);
+  return <div><QuoteTable symbols={GLOBAL_SYMBOLS} title="Global Markets · US, Europe, Canada, Asia-Pacific, Middle East & ASEAN" /><div className="disclaimer" style={{ margin: 8 }}>Coverage is benchmark-first. Countries without a validated broad-market public feed are listed in the ASEAN coverage map rather than showing fabricated prices.</div><table className="tbl"><thead><tr><th>ASEAN market</th><th>Benchmark</th><th>Coverage</th><th>CCY</th></tr></thead><tbody>{ASEAN_COVERAGE.map(([country, symbol, benchmark, ccy]) => <tr key={country}><td className="sym">{country}</td><td>{symbol}</td><td>{benchmark}</td><td className="mono">{ccy}</td></tr>)}</tbody></table></div>;
 }
 
 export function UsMarketsPanel({ report }: PanelProps) {

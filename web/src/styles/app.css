@@ -247,7 +247,48 @@ a:hover { text-decoration: underline; }
   border-radius: 10px;
   box-shadow: var(--shadow);
 }
-.rail-flyout .cmd-item { grid-template-columns: 48px 1fr auto; }
+.rail-flyout .cmd-item {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: normal;
+  text-align: left;
+  justify-items: stretch;
+}
+.rail-flyout .cmd-item:hover {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+.rail-flyout .cmd-item .code {
+  min-width: 0;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.rail-flyout .cmd-item .label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rail-flyout .cmd-item .hint {
+  color: var(--text-mute);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  white-space: nowrap;
+}
 
 /* Main / workspace */
 .main { grid-area: main; display: grid; grid-template-rows: 34px 38px 1fr; min-width: 0; min-height: 0; }

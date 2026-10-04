@@ -9,7 +9,7 @@ import { NewsPanel } from './news';
 import { PulsePanel } from './pulse';
 import { AskPanel, Calculators, GuidePanel } from './tools';
 import { AssetHubPanel, BondsPanel, GlobalMarketsPanel, FundPanel, ScreenerPanel, SbnPanel, UsMarketsPanel } from './expanded';
-import { CompanyFundamentalsPanel, EquityFactorPanel, EquityPricesPanel, IdxAuctionFlowPanel, IdxForeignFlowPanel, IdxOwnershipPanel, IdxStockScannerPanel, InstitutionalPortfoliosPanel, InvestorPortfoliosPanel, MarketBreadthPanel, StockScreenerPanel, SectorRotationPanel, EtfDetailPanel, EtfFlowsPanel, EtfPricesPanel, EtfScreenerPanel, DollarFundingStressPanel, FxCarryPanel, FxStrengthPanel, ForexPricesPanel, FixedIncomePricesPanel, GlobalYieldCurvePanel, UsRatePricingPanel, UsRealYieldsPanel, CreditDefaultSwapPanel, CreditSentimentPanel, CreditRatingsPanel, AgricultureWeatherPanel, CommodityPricesPanel, CrudeOilFundamentalPanel, GoldFundamentalPanel, GoldIntermarketPanel, CryptoScannerPanel, CryptoNarrativesPanel, CryptoWhalePanel, CryptoPricesPanel, LiquidationMapPanel, FuturesTermStructurePanel, MarketVolatilityPanel, OptionsAnalyticsPanel, AssetsRatioPanel, MarketCompositeSentimentPanel, MarketFlowPanel, MarketRegimePanel, CotReportPanel, CtaPositioningPanel, DumbMoneyPanel, OrderFlowPanel, LiquidityStructurePanel, CentralBankDataPanel, EconomicGrowthPanel, EmploymentDataPanel, FedLiquidityPanel, FiscalDataPanel, InflationDataPanel, MacroCountryPanel, MacroAgentPanel, MacroRegimePanel, RecessionProbabilityPanel, GeopoliticalPanel, GlobalTradePanel, PortActivityPanel, StreamingChannelsPanel, AnalystReportsPanel, EconomicCalendarPanel, InstitutionalResearchPanel, MarketResearchAgentPanel, MorningBriefsPanel, NewsSummaryPanel, SessionSummaryPanel } from './research';
+import { CompanyFundamentalsPanel, EquityFactorPanel, EquityPricesPanel, IdxAuctionFlowPanel, IdxForeignFlowPanel, IdxOwnershipPanel, IdxStockScannerPanel, InstitutionalPortfoliosPanel, InvestorPortfoliosPanel, MarketBreadthPanel, StockScreenerPanel, SectorRotationPanel, EtfDetailPanel, EtfFlowsPanel, EtfPricesPanel, EtfScreenerPanel, DollarFundingStressPanel, FxCarryPanel, FxStrengthPanel, ForexPricesPanel, FixedIncomePricesPanel, GlobalYieldCurvePanel, UsRatePricingPanel, UsRealYieldsPanel, CreditDefaultSwapPanel, CreditSentimentPanel, CreditRatingsPanel, AgricultureWeatherPanel, CommodityPricesPanel, CrudeOilFundamentalPanel, GoldFundamentalPanel, GoldIntermarketPanel, CryptoScannerPanel, CryptoNarrativesPanel, CryptoWhalePanel, CryptoPricesPanel, LiquidationMapPanel, FuturesTermStructurePanel, MarketVolatilityPanel, OptionsAnalyticsPanel, AssetsRatioPanel, MarketCompositeSentimentPanel, MarketFlowPanel, MarketRegimePanel, CotReportPanel, CtaPositioningPanel, DumbMoneyPanel, OrderFlowPanel, LiquidityStructurePanel, CentralBankDataPanel, EconomicGrowthPanel, EmploymentDataPanel, FedLiquidityPanel, FiscalDataPanel, InflationDataPanel, MacroCountryPanel, MacroAgentPanel, MacroRegimePanel, RecessionProbabilityPanel, GeopoliticalPanel, GlobalTradePanel, PortActivityPanel, StreamingChannelsPanel, AnalystReportsPanel, EconomicCalendarPanel, InstitutionalResearchPanel, MarketResearchAgentPanel, MorningBriefsPanel, NewsSummaryPanel, SessionSummaryPanel, GeopoliticalRiskMapPanel, News24Panel, CryptoNewsPanel, MarketArticlesPanel, ChartComparisonPanel, ChartPatternPanel, ChartPredictionPanel, LiveChartPanel, MarketStructurePanel, MeanReversionPanel, SupportResistancePanel, TechnicalIndicatorsPanel, TrendMomentumPanel, CustomBacktestPanel, FxCommoditySignalPanel, SmartDecisionPanel, PortfolioMonitorPanel, PortfolioSimulatorPanel, RegimeAllocatorPanel, RiskBetaPanel, TradingJournalPanel, MarketReportBuilderPanel, MarketWidgetsPanel, PredictionMarketPanel, StatisticalAnalysisPanel, WeekendMarketPanel } from './research';
 import type { PanelProps } from './types';
 
 /** Panel type → component. Metadata (titles, sizes, keywords) lives in lib/panels.ts. */
@@ -108,4 +108,30 @@ export const PANEL_COMPONENTS: Record<PanelType, ComponentType<PanelProps>> = {
   MOR: MorningBriefsPanel,
   NSM: NewsSummaryPanel,
   SES: SessionSummaryPanel,
+  GRM: GeopoliticalRiskMapPanel,
+  NEW: News24Panel,
+  CNW: CryptoNewsPanel,
+  ART: MarketArticlesPanel,
+  CHC: ChartComparisonPanel,
+  CPS: ChartPatternPanel,
+  CPM: ChartPredictionPanel,
+  LVC: LiveChartPanel,
+  MST: MarketStructurePanel,
+  MRV: MeanReversionPanel,
+  SAR: SupportResistancePanel,
+  TIN: TechnicalIndicatorsPanel,
+  TRM: TrendMomentumPanel,
+  BTL: CustomBacktestPanel,
+  FCS: FxCommoditySignalPanel,
+  SDS: SmartDecisionPanel,
+  PTM: PortfolioMonitorPanel,
+  PTS: PortfolioSimulatorPanel,
+  RBA: RegimeAllocatorPanel,
+  RBA2: RiskBetaPanel,
+  TRJ: TradingJournalPanel,
+  MRB: MarketReportBuilderPanel,
+  MWG: MarketWidgetsPanel,
+  PMK: PredictionMarketPanel,
+  STA: StatisticalAnalysisPanel,
+  WEM: WeekendMarketPanel,
 };

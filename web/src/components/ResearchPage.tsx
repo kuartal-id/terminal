@@ -3,9 +3,14 @@ import { PanelFrame } from './PanelFrame';
 import type { PanelType } from '../lib/panels';
 import type { Params } from '../lib/store';
 
-type PageKey = 'markets' | 'indonesia' | 'fixed-income' | 'macro' | 'crypto' | 'research' | 'tools';
+type PageKey = 'markets' | 'global' | 'indonesia' | 'fixed-income' | 'macro' | 'crypto' | 'research' | 'tools';
 
 const PAGES: Record<PageKey, { title: string; subtitle: string; panels: [PanelType, Params, string][] }> = {
+  global: {
+    title: 'Global Markets',
+    subtitle: 'A benchmark-first global monitor covering all ASEAN markets plus Europe, North America, Asia-Pacific and Saudi Arabia.',
+    panels: [['GLO', {}, 'Global benchmark monitor'], ['MAC', { indicator: 'NY.GDP.MKTP.CD', countries: 'IDN,MYS,SGP,THA,PHL,VNM,BRN,KHM,LAO,MMR' }, 'ASEAN macro map'], ['FX', {}, 'Global FX'], ['NWS', { region: 'global' }, 'Global market news']],
+  },
   markets: {
     title: 'Markets',
     subtitle: 'Global market dashboard across Indonesia, the US, Asia, FX and commodities.',

@@ -37,6 +37,27 @@ Hard product constraints from the owner — do not violate:
 10. **Commit messages** say what and why, and end with a trailer naming the agent, e.g. `Agent: Codex` / `Agent: Gemini` / `Agent: Claude`.
 11. **When unsure, ask.** A question costs minutes; a broken production deploy costs users.
 
+## Kuartal ID integration (status — keep this current)
+
+"Log in with Kuartal ID" (OIDC code + PKCE S256 against https://id.kuartal.id) lives in `server/src/auth.ts`
+(protected). Login is optional on `main` (guests get free panels; Pro needs the `research.premium` entitlement).
+Open PR #1 (`ai/claude/require-kuartal-id`) makes login + `terminal.access` mandatory and re-checks entitlements
+every 15 min via an encrypted session with the refresh token. 'Continue with Google' is provided by Kuartal ID
+itself — never add Google/social login code here.
+
+- **id_token is mandatory and fully verified** (`jose` `jwtVerify`): RS256 signature via JWKS, `iss` ==
+  `KUARTAL_ID_ISSUER`, `aud` == `KUARTAL_ID_CLIENT_ID`, `exp`/`iat` (60s tolerance), and `nonce` must be present and
+  equal the one stored in the signed `kt_oidc` flow cookie. Missing id_token or nonce → login refused
+  (`/?auth=error&reason=id_token|nonce`).
+- The nonce is sent on `/oauth/authorize` **and** in the `/oauth/token` body, because kuartal-login currently reads it
+  from the token request (its `TokenController`). Without the token-body copy every login fails with `reason=nonce`.
+- Entitlements come from `/oauth/userinfo`; the session cookie is signed (HS256, `SESSION_SECRET`).
+- **Env:** `APP_URL`, `SESSION_SECRET` (≥32 chars), `KUARTAL_ID_ISSUER` (default `https://id.kuartal.id`; must equal the
+  id_token `iss`), `KUARTAL_ID_CLIENT_ID`, `KUARTAL_ID_CLIENT_SECRET`, `PREMIUM_ENTITLEMENT`, `UPGRADE_URL`.
+- **Redirect URI to register on the Kuartal ID client:** `https://terminal.kuartalsystems.com/auth/callback`.
+- Deploy is manual (Docker on a home server — see docs/DEPLOY.md); merging does not deploy.
+- Tests: `server/test/auth-oidc.test.ts` (fakes Kuartal ID with a generated RSA key/JWKS and a stubbed `fetch`).
+
 ## Commands
 
 ```sh

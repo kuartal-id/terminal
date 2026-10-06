@@ -1,3 +1,16 @@
+## 2026-10-06 — Grok Bot — Kuartal ID id_token hardening + red CI fix
+Branch/PR: `fix/kuartal-id-hardening` (branch name requested by Diemas instead of `ai/<agent>/<topic>`). Not merged; protected files touched → needs `owner-approved`.
+Changed:
+- **CI was red on `main`** (`npm run typecheck`: `Type '"Research"' is not assignable to type 'Category'` in `web/src/lib/panels.ts`). Three panels used a non-existent `Research` category; moved them to existing categories (ART → Markets, MRB → Tools, PMK → Analytics). Panel codes unchanged (stable contract). They now show up in the sidebar/catalogue menus again (they were in no category before).
+- `server/src/auth.ts`: the id_token is now **required** (was skipped when absent) and verified with `issuer: KUARTAL_ID_ISSUER`, `audience`, `algorithms: ['RS256']`, `requiredClaims: sub/exp/iat/nonce`, 60s clock tolerance; nonce must equal the flow cookie's. Nonce is also sent in the `/oauth/token` body — kuartal-login reads it from there, so before this change **every real Kuartal ID login failed with `reason=nonce`**.
+- New `server/test/auth-oidc.test.ts` (8 tests: valid login, nonce mismatch, missing nonce, missing id_token, wrong iss, wrong aud, expired, unknown signing key).
+- AGENTS.md: "Kuartal ID integration" status section.
+Why: Kuartal ID hardening across all Kuartal apps (Diemas, 2026-10-06).
+Verified: `npm ci`, `npm run typecheck` (now green), `npm test` (server 41 + web 21 passed), `npm run build` OK. `node scripts/check-guardrails.mjs` fails only on protected paths (`server/src/auth.ts`, `AGENTS.md`) until `owner-approved`. Not tested against the real id.kuartal.id; no UI change except the 3 panels' menu placement (not visually checked in a browser).
+Interaction with open PR #1 (`ai/claude/require-kuartal-id`): this PR only touches the token-request body and the id_token-verification block of `callback()`; PR #1 rewrites session handling/userinfo around it. Expect at most a small textual conflict in `callback()` (keep both: PR #1's session/userinfo code + this PR's mandatory id_token block). PR #1's refresh path does not re-verify id_tokens (fine — it only re-reads userinfo).
+Not done / known issues: userinfo `sub` is not cross-checked against the id_token `sub` (left out to avoid conflicting with PR #1's `fetchUserinfo` refactor — add after PR #1 merges). Kuartal ID should bind the nonce at /oauth/authorize (then drop the token-body copy).
+Next agent should: 1) merge order: this PR first (CI green), then rebase PR #1; 2) after PR #1, add `info.sub === sub` check in `callback()`; 3) deploy manually per docs/DEPLOY.md and do one real login.
+
 ## 2026-10-04 — Codex — Terminal expansion and multi-page UI
 Branch/PR: ai/codex/terminal-expansion
 Changed: Added multi-page navigation (Dashboard, Markets, Indonesia, Bonds & Rates, Macro, Digital Assets, Research, Tools) while retaining the existing customizable dashboard/workspace system. Added US Markets, Bonds & Rates, Indonesia SBN, Funds & Fixed Income, Market Screener and Asset Class Hub panels. Added explicit Ask Kuartal "Coming soon" messaging. Reworked sidebar category flyouts to use contained menus and made empty workspaces recoverable instead of appearing blank. Added commands for the new sections and registered the new panel codes in the stable contract.

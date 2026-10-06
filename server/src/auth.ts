@@ -164,6 +164,9 @@ export async function callback(c: Context) {
       client_id: config.kuartalId.clientId,
       client_secret: config.kuartalId.clientSecret,
       code_verifier: flow.verifier,
+      // kuartal-login currently reads the nonce from the token request
+      // (TokenController) rather than binding it at /oauth/authorize.
+      nonce: flow.nonce,
     }),
   });
   if (!tokenRes.ok) return fail('token');
@@ -172,16 +175,23 @@ export async function callback(c: Context) {
   let sub = '';
   let name: string | undefined;
   let email: string | undefined;
-  if (tokens.id_token) {
-    try {
-      const { payload } = await jwtVerify(tokens.id_token, jwks!, { audience: config.kuartalId.clientId });
-      if (payload.nonce !== flow.nonce) return fail('nonce');
-      sub = String(payload.sub);
-      name = payload.name as string | undefined;
-      email = payload.email as string | undefined;
-    } catch {
-      return fail('id_token');
-    }
+  // The id_token is mandatory: signature (JWKS), issuer, audience, exp/iat
+  // and nonce must all check out, otherwise the login is refused.
+  if (!tokens.id_token) return fail('id_token');
+  try {
+    const { payload } = await jwtVerify(tokens.id_token, jwks!, {
+      issuer: config.kuartalId.issuer,
+      audience: config.kuartalId.clientId,
+      algorithms: ['RS256'],
+      requiredClaims: ['sub', 'exp', 'iat', 'nonce'],
+      clockTolerance: 60,
+    });
+    if (typeof payload.nonce !== 'string' || payload.nonce !== flow.nonce) return fail('nonce');
+    sub = String(payload.sub);
+    name = payload.name as string | undefined;
+    email = payload.email as string | undefined;
+  } catch {
+    return fail('id_token');
   }
   // Entitlements are not in the ID token; Kuartal ID returns them from /oauth/userinfo.
   let ent: string[] = [];

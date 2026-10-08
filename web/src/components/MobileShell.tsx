@@ -31,6 +31,21 @@ export function MobileShell() {
   const focusSymbol = useStore((s) => s.focusSymbol);
   const first = useRef(true);
 
+  // Panels opened from the command bar / Ask Kuartal show up in the More tab.
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      const type = (e as CustomEvent<{ type: PanelType }>).detail?.type;
+      if (!type || !(type in PANELS)) return;
+      if (type === 'CHT') return setTab('chart');
+      if (type === 'NWS') return setTab('news');
+      if (type === 'WL') return setTab('watch');
+      setMore(type);
+      setTab('more');
+    };
+    window.addEventListener('kt:open-panel', onOpen);
+    return () => window.removeEventListener('kt:open-panel', onOpen);
+  }, []);
+
   // Tapping a symbol anywhere jumps to the chart tab.
   useEffect(() => {
     if (first.current) {

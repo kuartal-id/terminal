@@ -748,3 +748,6 @@ button.chip:hover, .chip.on { border-color: var(--accent); color: var(--accent);
 .access-card .disclaimer { border: 0; padding: 4px 0 0; }
 .gate-cta { height: 40px; padding: 0 20px; font-size: 14px; }
 .gate-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+
+/* Research cards inside panels (not the page-level .research-card grid item) */
+.rcard { min-width: 0; border: 1px solid var(--line-soft); border-radius: 8px; background: var(--panel-alt); }

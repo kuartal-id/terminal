@@ -1,3 +1,51 @@
+## 2026-10-09 — Claude (Opus) — 27 research panels moved from placeholder to real free data
+
+Branch/PR: ai/claude/research-panels-real-data (no protected files touched; no panel codes added or removed).
+Context: Codex's PRs #2/#4 registered ~120 Kuantara-style panels, but ~96 were placeholders (a "reserved" note or the
+same generic quote table with a changePct-based RISK-ON/OFF label). This batch replaces 27 of them with real analytics.
+Changed:
+- New server code: `services/ta.ts` (pure indicators, levels, structure, stats, regression, ratio, FX strength, RRG,
+  breadth, portfolio back-test), `services/research.ts` (multi-timeframe candles 1D/4H/15M, comparisons, rotation
+  universes, breadth universes, vol, futures curves), `services/macroUs.ts` + `providers/fred.ts` (FRED topics with
+  funding/recession/net-liquidity gauges), `providers/feeds.ts` (CFTC COT, SEC companyfacts, Polymarket events),
+  `routes/research.ts` mounted at `/api/research` (+ `/api/research/sources-status`). Types in `shared/research.ts`
+  (deliberately not in protected shared/types.ts).
+- Web: `panels/technical.tsx` (TIN TRM MRV SAR MST), `panels/quant.tsx` (STA CHC ARR RBA2 PTS FXS VOL BRD ROT FTS CMS),
+  `panels/usmacro.tsx` (URY FNL REC EMP INF DFS FIS EGW + COT CFD PMK), `components/charts.tsx` (SVG charts sized via
+  ResizeObserver), registry swapped to these components (codes unchanged → saved layouts keep working).
+  Terminal Guide gains a "Data source status" check. Mobile: panels opened from the command bar now show in the More
+  tab (was a pre-existing bug: they opened in the hidden desktop grid) via a `kt:open-panel` window event in lib/actions.ts.
+Licensing decisions: FRED = US-government series only (ICE BofA/Moody's/S&P/UMich excluded) → CMS is an ETF proxy and
+says so. Official feeds (CFTC/SEC/Polymarket) return 502 when unreachable, never demo numbers. Futures curves show
+nothing rather than invented curves. Macro gauges computed on demo data are relabelled "Demo data: not real conditions".
+Polymarket shown as information only, no links to bet (Kuartal is OJK-supervised).
+Verified: npm run check (server 71 + web 21 tests; 30 new in server/test/research.test.ts incl. route tests in demo mode),
+guardrails, desktop 1500px + phone 390px screenshots of TIN/TRM/SAR/DFS/ROT/PTS/STA/COT.
+NOT verified: any live upstream (sandbox has no outbound access). Parsers are tested against hand-made fixtures in each
+source's documented format. After deploy, open Terminal Guide → "Check which sources are reachable", then spot-check
+FRED (DFS), CFTC (COT), SEC (CFD with AAPL), Polymarket (PMK), and Yahoo futures symbols (FTS, e.g. CLZ26.NYM).
+Still placeholders (69): EFS EQP IAF IFF IOW ISS IPP IVP STK ETD ETF ETP ETS FCA FXP FIP GYC URP CDS CRR AGW CMD OIL
+GLF GIS CLS CNT CWT CPR LQM OPT MCS MFL MRL CTA DMI OFL LST CBD MCY MGA MGR GPI GTM POR STR ANR ECO INR MRA MOR NSM SES
+GRM NEW CNW ART CPS CPM LVC BTL FCS SDS PTM RBA TRJ MRB MWG WEM. The replaced placeholder components are still
+exported from panels/research.tsx (unused) — delete in a cleanup PR once this merges.
+Next agent should: (1) verify live sources after deploy; (2) next free-data batch: GYC (Treasury + ECB/BoE/BoJ public
+yields), CBD (FRED DFEDTARU/ECBDFR + BI rate), MCS/MRL (composite from Pulse + VOL + CMS + breadth), IPP/IVP (SEC 13F
+XML), ETP/CMD/CPR/FXP as proper price matrices, CLS (Binance 24h tickers), ECO (FRED release calendar), EFS (factor
+scores from price + SEC fundamentals for US names); (3) keep everything descriptive (no buy/sell).
+## 2026-10-09 — Claude (Opus) — Require Kuartal ID login + terminal.access (written 10-04, rebased onto Grok's 10-06 hardening; added userinfo sub check, plain-language login errors, refresh re-check tests)
+
+Branch/PR: ai/claude/require-kuartal-id (owner-approved in chat; touches protected auth.ts, config.ts, shared/types.ts)
+Changed: server gate on all /api/* except /api/health and /api/me (401 login_required / 403 access_required);
+`Me.access` + `Me.loginRequired`; AccessGate screen (login / no-access) shown before any data loads;
+session cookie now encrypted (A256GCM) and holds the Kuartal ID refresh token — entitlements re-checked every
+15 min with per-token de-duplication (Kuartal ID rotates refresh tokens with reuse detection); session 30 days.
+New env: REQUIRE_LOGIN (default true), ACCESS_ENTITLEMENT (default terminal.access). Production moved to Hostinger
+Node.js hosting (see DEPLOY.md). Companion PR: kuartal-id/kuartal-login#1 (adds terminal.access + Terminal Access tier).
+Verified: npm run check (39 server + 21 web tests, incl. 6 new gate tests); screenshots of both gate states.
+NOT verified: a real login round-trip against id.kuartal.id (needs the OAuth client created on the server).
+Next agent should: after the first real login, confirm refresh-token re-check works (Hostinger logs);
+consider an admin shortcut on id.kuartal.id listing who has terminal.access.
+
 ## 2026-10-06 — Grok Bot — Kuartal ID id_token hardening + red CI fix
 Branch/PR: `fix/kuartal-id-hardening` (branch name requested by Diemas instead of `ai/<agent>/<topic>`). Not merged; protected files touched → needs `owner-approved`.
 Changed:
@@ -38,20 +86,6 @@ Next agent should: concrete next steps
 ```
 
 ---
-
-## 2026-10-04 — Claude (Opus) — Require Kuartal ID login + terminal.access
-
-Branch/PR: ai/claude/require-kuartal-id (owner-approved in chat; touches protected auth.ts, config.ts, shared/types.ts)
-Changed: server gate on all /api/* except /api/health and /api/me (401 login_required / 403 access_required);
-`Me.access` + `Me.loginRequired`; AccessGate screen (login / no-access) shown before any data loads;
-session cookie now encrypted (A256GCM) and holds the Kuartal ID refresh token — entitlements re-checked every
-15 min with per-token de-duplication (Kuartal ID rotates refresh tokens with reuse detection); session 30 days.
-New env: REQUIRE_LOGIN (default true), ACCESS_ENTITLEMENT (default terminal.access). Production moved to Hostinger
-Node.js hosting (see DEPLOY.md). Companion PR: kuartal-id/kuartal-login#1 (adds terminal.access + Terminal Access tier).
-Verified: npm run check (39 server + 21 web tests, incl. 6 new gate tests); screenshots of both gate states.
-NOT verified: a real login round-trip against id.kuartal.id (needs the OAuth client created on the server).
-Next agent should: after the first real login, confirm refresh-token re-check works (Hostinger logs);
-consider an admin shortcut on id.kuartal.id listing who has terminal.access.
 
 ## 2026-10-03 — Claude (Opus) — MVP v0.1.0 built from an empty repo
 

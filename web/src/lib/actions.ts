@@ -8,6 +8,8 @@ export function runActions(actions: Action[]) {
     switch (a.kind) {
       case 'open':
         s.openPanel(a.type, a.params ?? {}, { reuse: a.reuse });
+        // The mobile shell has no workspace grid; it listens for this to show the panel.
+        if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('kt:open-panel', { detail: { type: a.type } }));
         break;
       case 'focus':
         s.focus(a.symbol);

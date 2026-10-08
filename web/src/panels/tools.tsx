@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { askKuartal, type Reply } from '../lib/assistant';
 import { runActions } from '../lib/actions';
 import { fmtNum } from '../lib/format';
+import { useApi } from '../lib/api';
+import { ErrorBox, Loading } from '../components/bits';
 import { CATEGORIES, PANELS, PANEL_ORDER } from '../lib/panels';
 import { activeWorkspace, useStore } from '../lib/store';
 import type { PanelProps } from './types';
@@ -181,6 +183,36 @@ export function AskPanel({ report }: PanelProps) {
 
 // ───────────── HELP · Terminal Guide ─────────────
 
+/** Which free upstream sources answer from the server right now (checked at most every 5 min). */
+function SourceStatusList() {
+  const [open, setOpen] = useState(false);
+  const { data, error, reload } = useApi<{ dataMode: string; checkedAt: string; sources: { name: string; ok: boolean; ms: number; detail?: string }[] }>(open ? '/api/research/sources-status' : null);
+  return (
+    <>
+      <p className="section-label" style={{ marginTop: 14 }}>Data source status</p>
+      {!open ? (
+        <button className="btn small" onClick={() => setOpen(true)}>Check which sources are reachable</button>
+      ) : error ? (
+        <ErrorBox message={error.message} onRetry={reload} />
+      ) : !data ? (
+        <Loading rows={3} />
+      ) : (
+        <table className="tbl" style={{ fontSize: 11.5 }}>
+          <tbody>
+            {data.sources.map((s) => (
+              <tr key={s.name} title={s.detail}>
+                <td>{s.name}</td>
+                <td style={{ color: s.ok ? 'var(--up)' : 'var(--down)' }}>{s.ok ? 'Reachable' : 'Unreachable'}</td>
+                <td className="num mono mute">{s.ms} ms</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </>
+  );
+}
+
 export function GuidePanel({ report }: PanelProps) {
   const openPanel = useStore((s) => s.openPanel);
   useEffect(() => report({ source: 'static', provider: 'Kuartal Terminal' }), [report]);
@@ -228,6 +260,7 @@ export function GuidePanel({ report }: PanelProps) {
       <p style={{ marginTop: 0 }}>
         Every panel shows where its data comes from: <span className="src live">LIVE</span> real-time, <span className="src delayed">DELAYED</span> exchange data (~15 min), <span className="src eod">EOD</span> daily reference, <span className="src static">ANNUAL</span> official statistics, and <span className="src demo">DEMO</span> when a source was unreachable and illustrative numbers are shown instead.
       </p>
+      <SourceStatusList />
       <p className="section-label" style={{ marginTop: 14 }}>Workspaces</p>
       <p style={{ marginTop: 0 }}>Drag panels by their header, resize from the corner. Layouts save automatically in this browser. Click any symbol to send it to linked (🔗) charts.</p>
       <p className="mute" style={{ fontSize: 11 }}>

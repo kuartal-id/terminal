@@ -12,6 +12,10 @@ what they're looking at.
 | Frankfurter (`api.frankfurter.dev`) — ECB euro reference rates | FX board | Free, no key | Open; ECB reference rates | `eod` |
 | World Bank Open Data API | Macro indicators by country | Free, no key | CC BY 4.0 — attribution shown in the panel | `static` |
 | Public RSS feeds (CNBC Indonesia, Antara, Tempo, CNBC, MarketWatch, Federal Reserve, ECB, CoinDesk) | News headlines | Free | We show **headline + link + source only**, never article text | `live` |
+| FRED `fredgraph.csv` (St. Louis Fed), no key | US macro dashboards: real yields, net liquidity, recession, employment, inflation, funding stress, fiscal, growth | Free, no key | **Only US-government-sourced series** (Fed Board, BLS, BEA, Treasury, Atlanta/NY Fed), public domain. Do NOT add third-party copyrighted FRED series (ICE BofA, Moody's, S&P, UMich) | `eod` |
+| CFTC Public Reporting (Socrata `6dca-aqww`, legacy futures-only COT) | COT Report panel | Free, no key | US government, public domain | `eod` |
+| SEC EDGAR XBRL `companyfacts` + `company_tickers.json` | Company Fundamentals (US filers) | Free, no key; SEC requires a descriptive User-Agent with contact email, ≤10 req/s | US government, public domain | `eod` |
+| Polymarket Gamma API (`gamma-api.polymarket.com/events`) | Prediction Market panel (crowd-implied probabilities) | Free, no key | Public market data. Shown as information only, no links to bet; reconsider if OJK/Komdigi guidance changes | `delayed` |
 | `providers/demo.ts` | Fallback when a source is unreachable | — | Synthetic, deterministic | `demo` (amber badge) |
 
 Charts use TradingView **lightweight-charts** (Apache-2.0). Its licence requires the
@@ -30,6 +34,10 @@ small TradingView attribution logo on charts — keep `attributionLogo: true`.
 - **Bank Indonesia rate / SBN yields** — BI publishes on its website (no API). A small scheduled scraper with
   attribution could work; check BI's terms first.
 - **Economic calendar** — no clean free source; Fed/ECB/BI calendars could be hand-maintained.
+- **IDX company fundamentals** — no free licensed source (IDX/KSEI data is licensed). Company Fundamentals covers US SEC filers only.
+- **Credit spreads (OAS)** — ICE BofA indices on FRED are copyrighted; Credit Market Sentiment uses an HYG/LQD vs IEF ETF proxy instead.
+- **Agriculture weather** — Open-Meteo is free for non-commercial use only; Kuartal Terminal has paid tiers, so it needs a commercial plan or a public-domain source (NOAA covers the US only).
+- **Fed funds futures / meeting probabilities** — CME data is licensed; US Rate Pricing still needs a free source.
 
 ## Swapping a provider
 All symbol routing is in `server/src/services/market.ts`. To replace Yahoo with a

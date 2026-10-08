@@ -1,0 +1,8 @@
+[
+ {"slug":"fed-decision-in-december","title":"Fed decision in December?","markets":[
+   {"id":"501","question":"Fed cuts 25 bps in December?","endDate":"2026-12-10T00:00:00Z","volumeNum":1250000.5,"liquidityNum":90000,"outcomes":"[\"Yes\", \"No\"]","outcomePrices":"[\"0.62\", \"0.38\"]","active":true,"closed":false},
+   {"id":"502","question":"Fed hikes in December?","volume":"3000","outcomes":["Yes","No"],"outcomePrices":["0.03","0.97"],"active":true,"closed":false},
+   {"id":"503","question":"Old closed market","outcomes":"[\"Yes\",\"No\"]","outcomePrices":"[\"1\",\"0\"]","active":true,"closed":true},
+   {"id":"504","question":"Broken prices","outcomes":"[\"Yes\",\"No\"]","outcomePrices":"not json","active":true}
+ ]}
+]

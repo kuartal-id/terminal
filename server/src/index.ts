@@ -15,6 +15,7 @@ import { getCorrelation, getSeasonality } from './services/analytics';
 import { getHistory, getQuotes, HISTORY_RANGES } from './services/market';
 import { getNews } from './services/news';
 import { getPulse } from './services/pulse';
+import { research } from './routes/research';
 
 const VERSION = '0.1.0';
 const started = Date.now();
@@ -76,6 +77,10 @@ app.get('/api/sources', (c) =>
       { name: 'US Treasury', use: 'Yield curve', terms: 'US government public domain' },
       { name: 'Frankfurter / ECB', use: 'Reference FX rates', terms: 'Free, open' },
       { name: 'World Bank Open Data', use: 'Macro indicators', terms: 'CC BY 4.0' },
+      { name: 'FRED (St. Louis Fed)', use: 'US macro dashboards — US-government-sourced series only', terms: 'Public domain series; third-party copyrighted FRED series are not used' },
+      { name: 'CFTC Commitments of Traders', use: 'COT positioning', terms: 'US government public domain' },
+      { name: 'SEC EDGAR XBRL', use: 'US company fundamentals', terms: 'US government public domain' },
+      { name: 'Polymarket Gamma API', use: 'Crowd-implied event probabilities', terms: 'Public market data; shown as information only' },
     ],
   }),
 );
@@ -147,6 +152,9 @@ app.get('/api/macro', async (c) => {
   });
   return c.json({ ...data, asOf: new Date().toISOString() });
 });
+
+// ── Research panels (technicals, US macro, CFTC/SEC/Polymarket) ──
+app.route('/api/research', research);
 
 // ── Ask Kuartal AI (placeholder) ─────────────────────────────────
 // The browser already runs a free rule-based assistant. When a self-hosted

@@ -1,3 +1,12 @@
+## 2026-10-09 — Claude (Opus) — Patch shell-quote CVE-2026-102422 (Hostinger warning)
+
+Branch/PR: ai/claude/fix-shell-quote-cve
+Changed: devDependency `concurrently` ^10.0.5 → ^10.0.6, which pulls `shell-quote` 1.12.0 (was 1.9.0; fix is ≥1.11.0).
+package.json + package-lock.json only. shell-quote is only used by `npm run dev` (concurrently), not by the production server.
+Why: Hostinger flagged CVE-2026-102422 (shell-quote `quote()` command injection) on terminal.kuartalsystems.com.
+Verified: `npm audit` → 0 vulnerabilities (all and --omit=dev); `npm run check` green.
+Next agent should: nothing; PRs #1 and #7 will need a trivial lockfile/handoff rebase if merged after this.
+
 ## 2026-10-06 — Grok Bot — Kuartal ID id_token hardening + red CI fix
 Branch/PR: `fix/kuartal-id-hardening` (branch name requested by Diemas instead of `ai/<agent>/<topic>`). Not merged; protected files touched → needs `owner-approved`.
 Changed:

@@ -45,7 +45,16 @@ Verified: npm run check (39 server + 21 web tests, incl. 6 new gate tests); scre
 NOT verified: a real login round-trip against id.kuartal.id (needs the OAuth client created on the server).
 Next agent should: after the first real login, confirm refresh-token re-check works (Hostinger logs);
 consider an admin shortcut on id.kuartal.id listing who has terminal.access.
+=======
+## 2026-10-09 — Claude (Opus) — Patch shell-quote CVE-2026-102422 (Hostinger warning)
 
+Branch/PR: ai/claude/fix-shell-quote-cve
+Changed: devDependency `concurrently` ^10.0.5 → ^10.0.6, which pulls `shell-quote` 1.12.0 (was 1.9.0; fix is ≥1.11.0).
+package.json + package-lock.json only. shell-quote is only used by `npm run dev` (concurrently), not by the production server.
+Why: Hostinger flagged CVE-2026-102422 (shell-quote `quote()` command injection) on terminal.kuartalsystems.com.
+Verified: `npm audit` → 0 vulnerabilities (all and --omit=dev); `npm run check` green.
+Next agent should: nothing; PRs #1 and #7 will need a trivial lockfile/handoff rebase if merged after this.
+(Resolved 2026-10-09: merged after #1/#7 with both handoff entries kept.)
 ## 2026-10-06 — Grok Bot — Kuartal ID id_token hardening + red CI fix
 Branch/PR: `fix/kuartal-id-hardening` (branch name requested by Diemas instead of `ai/<agent>/<topic>`). Not merged; protected files touched → needs `owner-approved`.
 Changed:

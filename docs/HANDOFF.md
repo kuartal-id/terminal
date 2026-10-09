@@ -1,3 +1,16 @@
+## 2026-10-09 — Kuartal Devcloud — Merged PRs #1 + #7 + #8 to main and deployed to Hostinger
+
+Owner request in chat 2026-10-09 ("Claude should have made some improvements… hasn't been merged and deployed") = owner approval for the protected-path changes in these PRs (.env.example, server/src/auth.ts, server/src/config.ts, shared/types.ts — the guardrails alarm lists them; CI text remains advisory).
+Merged: ai/claude/require-kuartal-id (#1, ff) → ai/claude/research-panels-real-data (#7, ff; contains #1) → ai/claude/fix-shell-quote-cve (#8, merge commit d3185c6; only docs/HANDOFF.md conflicted, both entries kept). PRs auto-closed on push.
+Verified locally before push: `npm ci` + `npm run check` — typecheck, server+web tests, web+server build all green (guardrails warning expected/approved).
+Deploy: hPanel Node.js app auto-deploys on push to main — confirmed working (new version dir + symlink flip + Passenger restart, ~90 s). One incident: the merged code defaults REQUIRE_LOGIN=true while production has no Kuartal ID OAuth client (authConfigured=false), so the push login-walled the whole terminal (every /api/* → 401, no working login). Fixed within minutes via SetEnv in the docroot .htaccess:
+- `SetEnv REQUIRE_LOGIN false` — gate OFF until id.kuartal.id OAuth client (redirect URI https://terminal.kuartalsystems.com/auth/callback) + terminal.access entitlements are granted to members.
+- `SetEnv SESSION_SECRET <64-hex>` — generated 2026-10-09 (secret lives in hPanel env / .htaccess; not in git). Backup of pre-edit .htaccess at ~/hbuilds-config/htaccess.bak.20261009 on the server.
+NOTE for future deploys: `.htaccess` in public_html is NOT in the repo; Hostinger rebuilds never touch it, so these SetEnv lines persist across auto-deploys.
+Live verification: /api/health ok, boot log "login optional", /api/pulse 200, /api/research/sources-status works. Source reachability from Hostinger: Yahoo/Binance/FRED/WorldBank/CFTC/SEC/Frankfurter OK; US Treasury (home.treasury.gov) and Polymarket (gamma-api.polymarket.com) blocked from the server network (timeout/fetch failed) — panels label these honestly, no invented data. Worth checking whether Hostinger's egress firewall or the upstream blocks the DC IP.
+To turn the gate ON later: create the Passport client on id.kuartal.id (see below), set KUARTAL_ID_CLIENT_ID/SECRET in hPanel env (Websites → terminal.kuartalsystems.com → Node.js → Environment variables), flip REQUIRE_LOGIN to true (or remove the SetEnv line), rebuild. Grant terminal.access via id.kuartal.id Admin → Users → Entitlements.
+Still open: PR #3 (ai/codex/global-market-expansion, +51 lines, from 10-04, OPEN — unreviewed); branches ai/codex/terminal-expansion (+396) and ai/codex/kuantara-feature-expansion (+906, no PR) — all three predate the real-data rewrite and may conflict with or duplicate panels now replaced by #7; evaluate before merging. ~69 placeholder panel codes remain (list in the #7 entry above).
+
 ## 2026-10-09 — Claude (Opus) — 27 research panels moved from placeholder to real free data
 
 Branch/PR: ai/claude/research-panels-real-data (no protected files touched; no panel codes added or removed).
